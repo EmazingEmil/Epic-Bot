@@ -1,5 +1,3 @@
-// SPA navigation and animations for Epic Bot Website
-
 document.addEventListener('DOMContentLoaded', () => {
     const navLinks = document.querySelectorAll('.nav-link');
     const sections = document.querySelectorAll('.page-section');
@@ -29,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Also handle SPA navigation for hero buttons
     const heroButtons = document.querySelectorAll('.hero-buttons [data-page]');
     heroButtons.forEach(btn => {
         btn.addEventListener('click', e => {
@@ -40,11 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Handle hash navigation on load
     const initialPage = window.location.hash.replace('#', '') || 'home';
     showSection(initialPage);
 
-    // Animate feature cards on section show
     const featuresSection = document.getElementById('features');
     const featureCards = featuresSection.querySelectorAll('.feature-card');
     featuresSection.addEventListener('transitionend', () => {
@@ -56,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Animate hero avatar on hover
     const botAvatar = document.querySelector('.bot-avatar');
     if (botAvatar) {
         botAvatar.addEventListener('mouseenter', () => {
