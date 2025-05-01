@@ -44,6 +44,19 @@ body {
   letter-spacing: 2px;
   color: var(--primary);
   text-shadow: 0 2px 16px #7f5af055;
+  background: linear-gradient(270deg, #7f5af0, #a259f7, #d16ba5, #7f5af0, #2cb67d, #845ec2, #7f5af0);
+  background-size: 600% 600%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: logo-gradient-fade 20s ease-in-out infinite;
+}
+@keyframes logo-gradient-fade {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 50% 50%; }
+  50% { background-position: 100% 50%; }
+  75% { background-position: 50% 50%; }
+  100% { background-position: 0% 50%; }
 }
 .nav-links {
   list-style: none;
