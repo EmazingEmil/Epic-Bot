@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Epic Bot - Discord Bot</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="Epic Bot.png">
+</head>
+<body>
+    <nav class="navbar glass">
+        <div class="logo"><img src="Epic Bot.png" alt="Epic Bot Logo" style="height:2.2rem;vertical-align:middle;margin-right:0.6rem;border-radius:50%;background:#fff;">Epic Bot</div>
+        <ul class="nav-links">
+            <li><a href="#home" data-page="home" class="nav-link active">Home</a></li>
+            <li><a href="#features" data-page="features" class="nav-link">Features</a></li>
+            <li><a href="#commands" data-page="commands" class="nav-link">Commands</a></li>
+            <li><a href="#invite" data-page="invite" class="nav-link">Invite</a></li>
+            <li><a href="#support" data-page="support" class="nav-link">Support</a></li>
+            <li><a href="#about" data-page="about" class="nav-link">About</a></li>
+        </ul>
+    </nav>
+    <main>
+        <section id="home" class="page-section active">
+            <div class="hero glass">
+                <h1 class="hero-title">Meet <span class="gradient-text">Epic Bot</span></h1>
+                <p class="hero-desc">The ultimate Discord bot for moderation, fun, music, and more. Minimalist, powerful, and easy to use.</p>
+                <div class="hero-buttons">
+                    <a href="#invite" data-page="invite" class="btn gradient-btn">Invite Now</a>
+                    <a href="#features" data-page="features" class="btn glass-btn">See Features</a>
+                </div>
+                <div class="hero-animation">
+                    <div class="bot-avatar" style="background-image:url('Epic Bot.png');background-size:cover;background-color:#fff;"></div>
+                    <div class="pulse"></div>
+                </div>
+            </div>
+        </section>
+        <section id="features" class="page-section">
+            <h2 class="section-title">Features</h2>
+            <div class="features-list">
+                <div class="feature-card glass fade-in">
+                    <h3>Moderation</h3>
+                    <p>Keep your server safe and organized with advanced moderation tools, including user management and message control.</p>
+                </div>
+                <div class="feature-card glass fade-in">
+                    <h3>Music</h3>
+                    <p>Enjoy high-quality music streaming in your voice channels, with easy controls for everyone.</p>
+                </div>
+                <div class="feature-card glass fade-in">
+                    <h3>General</h3>
+                    <p>Access a variety of fun and useful features to enhance your community experience.</p>
+                </div>
+                <div class="feature-card glass fade-in">
+                    <h3>Setup</h3>
+                    <p>Quick and simple setup for roles, permissions, logging and tickets to get your server running smoothly.</p>
+                </div>
+                <div class="feature-card glass fade-in">
+                    <h3>24/7 Uptime</h3>
+                    <p>Epic Bot is always online, ensuring your server is supported day and night, every day of the year.</p>
+                </div>
+            </div>
+        </section>
+        <section id="commands" class="page-section">
+            <h2 class="section-title">Commands</h2>
+            <div class="commands-list glass">
+                <div class="command-group">
+                    <h4>Moderation</h4>
+                    <ul>
+                        <li><span class="cmd">/kick [user] [reason]</span> - Kick a user</li>
+                        <li><span class="cmd">/ban [user] [reason]</span> - Ban a user</li>
+                        <li><span class="cmd">/nick [user] [nickname]</span> - Change a user’s nickname</li>
+                        <li><span class="cmd">/purge [amount]</span> - Delete recent messages</li>
+                        <li><span class="cmd">/hackban [user_id] [reason]</span> - Ban by user ID</li>
+                        <li><span class="cmd">/archive [limit]</span> - Archive last messages</li>
+                        <li><span class="cmd">/mute [user] [duration] [reason]</span> - Mute a user</li>
+                        <li><span class="cmd">/unmute [user] [reason]</span> - Unmute a user</li>
+                        <li><span class="cmd">/warning add [user] [reason]</span> - Add a warning</li>
+                        <li><span class="cmd">/warning remove [user] [warn_id]</span> - Remove a warning</li>
+                        <li><span class="cmd">/warning list [user]</span> - List warnings</li>
+                    </ul>
+                </div>
+                <div class="command-group">
+                    <h4>Music</h4>
+                    <ul>
+                        <li><span class="cmd">/play [song name or YouTube URL]</span> - Play a song from YouTube</li>
+                        <li><span class="cmd">/pause</span> - Pause the currently playing track</li>
+                        <li><span class="cmd">/resume</span> - Resume the paused track</li>
+                        <li><span class="cmd">/skip</span> - Skip the current song (only if there are songs in the queue)</li>
+                        <li><span class="cmd">/queue</span> - Show the current music queue</li>
+                        <li><span class="cmd">/leave</span> - Stop playback and leave the voice channel</li>
+                    </ul>
+                </div>
+                <div class="command-group">
+                    <h4>General</h4>
+                    <ul>
+                        <li><span class="cmd">/help</span> - List all commands the bot has loaded</li>
+                        <li><span class="cmd">/botinfo</span> - Get information about the bot</li>
+                        <li><span class="cmd">/serverinfo</span> - Get information about the server</li>
+                        <li><span class="cmd">/ping</span> - Check if the bot is alive</li>
+                        <li><span class="cmd">/invite</span> - Get the invite link for the bot</li>
+                        <li><span class="cmd">/server</span> - Get the invite link for the support server</li>
+                        <li><span class="cmd">/8ball [question]</span> - Ask any question to the bot</li>
+                        <li><span class="cmd">/feedback</span> - Submit feedback for the owners of the bot</li>
+                    </ul>
+                </div>
+                <div class="command-group">
+                    <h4>Setup</h4>
+                    <ul>
+                        <li><span class="cmd">/setup_moderation</span> - Start the moderation setup process for roles and permissions (admin only)</li>
+                        <li><span class="cmd">/setup-logs</span> - Setup your server's logging system and select which events to log (admin only)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <section id="invite" class="page-section">
+            <h2 class="section-title">Invite Epic Bot</h2>
+            <div class="invite-section glass">
+                <p>Add Epic Bot to your server and unlock powerful features!</p>
+                <a href="https://discord.com/oauth2/authorize?client_id=1337542083493232650&permissions=8&integration_type=0&scope=bot+applications.commands" target="_blank" class="btn gradient-btn big">Invite to Discord</a>
+            </div>
+        </section>
+        <section id="support" class="page-section">
+            <h2 class="section-title">Support</h2>
+            <div class="support-section glass">
+                <p>Need help or want to report a bug? Join our support server!</p>
+                <a href="https://discord.gg/d4WavDeE8V" target="_blank" class="btn glass-btn big">Join Support Server</a>
+                <p class="contact">Or email us: <a href="mailto:support@epicbot.com">support@epicbot.com</a></p>
+            </div>
+        </section>
+        <section id="about" class="page-section">
+            <h2 class="section-title">About Me</h2>
+            <div class="about-section glass">
+                <img src="Epic Bot.png" alt="Epic Bot Logo" class="about-avatar" style="width:90px;height:90px;border-radius:50%;margin-bottom:1.2rem;background:#fff;box-shadow:0 2px 16px #7f5af055;">
+                <h3>Emil <span style="font-size:1rem;color:#a7a9be;">(on Discord: emazingemil)</span></h3>
+                <p>Hey! I'm Emil, the creator of Epic Bot. I built this bot to help Discord communities stay safe, have fun, and enjoy awesome features like moderation, music, and more. I'm passionate about coding, automation, and making online spaces better for everyone. If you have feedback or want to connect, feel free to reach out on Discord!</p>
+            </div>
+        </section>
+    </main>
+    <footer class="footer glass">
+        <p>&copy; 2025 Epic Bot. Not affiliated with Discord.</p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
