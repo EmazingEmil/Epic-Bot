@@ -147,6 +147,13 @@ function handleLoginSection() {
         }
     }
 
+    // List of server IDs where the bot is present (for demo, replace with real data in the future)
+    const botGuilds = [
+        // Add your bot's server IDs here for demo/testing
+        '1365966790521258005', // Example: Epic Bot
+        // ...add more IDs as needed
+    ];
+
     if (userId && username) {
         const adminGuildsList = document.getElementById('admin-guilds-list');
         if (adminGuildsList) {
@@ -172,12 +179,22 @@ function handleLoginSection() {
                             </a>
                         `;
                     }).join('');
-                    // Optionally, add a click handler for future dashboard navigation
+                    // Add click handler for dashboard/invite logic
                     guildsListDiv.querySelectorAll('.guild-card').forEach(card => {
                         card.addEventListener('click', function(e) {
                             e.preventDefault();
                             const guildId = this.getAttribute('data-guild-id');
-                            alert('In the future, this will open the dashboard for guild ID: ' + guildId);
+                            // Check if bot is in the server
+                            if (botGuilds.includes(guildId)) {
+                                // Show empty dashboard page (for now, just clear the page and show a placeholder)
+                                document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;"><h1>Dashboard for Guild ID: ' + guildId + ' (Coming Soon)</h1></div>';
+                            } else {
+                                // Redirect to Discord bot invite link for that server
+                                const clientId = '1337542083493232650'; // Your bot's client ID
+                                const permissions = '8'; // Admin perms
+                                const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&scope=bot+applications.commands&permissions=${permissions}&guild_id=${guildId}&disable_guild_select=true`;
+                                window.location.href = inviteUrl;
+                            }
                         });
                     });
                 }
