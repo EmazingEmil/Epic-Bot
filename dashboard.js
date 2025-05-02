@@ -5,6 +5,108 @@ function escapeHTML(str) {
     return str.replace(/[&<>'"]/g, tag => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[tag]));
 }
 
+function renderModerationSection(data) {
+    const modDiv = document.getElementById('moderation-setup');
+    let html = `<div class="dashboard-card">
+        <span class="dashboard-label">Moderation Setup:</span> <span class="badge ${data.moderation_setup ? 'enabled' : 'disabled'}">${data.moderation_setup ? 'Enabled' : 'Disabled'}</span>
+    </div>`;
+    // Moderation roles/commands
+    if (data.moderation_roles && Object.keys(data.moderation_roles).length > 0) {
+        html += `<div class="dashboard-card"><span class="dashboard-label">Role Permissions:</span><table><tr><th>Role ID</th><th>Allowed Commands</th></tr>`;
+        for (const [roleId, cmds] of Object.entries(data.moderation_roles)) {
+            html += `<tr><td>${escapeHTML(roleId)}</td><td>${cmds.map(c => `<span class='badge enabled'>${escapeHTML(c)}</span>`).join(' ')}</td></tr>`;
+        }
+        html += `</table></div>`;
+    }
+    // Warnings
+    if (data.warnings && data.warnings.length > 0) {
+        html += `<button class="collapsible">Show Warnings (${data.warnings.length})</button><div class="collapsible-content"><table><tr><th>User</th><th>Moderator</th><th>Reason</th><th>Date</th><th>ID</th></tr>`;
+        for (const w of data.warnings) {
+            html += `<tr><td>${escapeHTML(String(w.user_id))}</td><td>${escapeHTML(String(w.moderator_id))}</td><td>${escapeHTML(w.reason)}</td><td>${w.created_at ? `<span class='dashboard-value'>${new Date(Number(w.created_at)*1000).toLocaleString()}</span>` : ''}</td><td>${w.warn_id}</td></tr>`;
+        }
+        html += `</table></div>`;
+    }
+    modDiv.innerHTML = html;
+}
+
+function renderTicketSection(data) {
+    const ticketDiv = document.getElementById('ticket-system');
+    if (!data.ticket_settings) {
+        ticketDiv.innerHTML = `<div class="dashboard-card">Ticket system not set up.</div>`;
+        return;
+    }
+    let html = `<div class="dashboard-card">
+        <span class="dashboard-label">Panel Channel ID:</span> <span class="dashboard-value">${escapeHTML(String(data.ticket_settings.channel_id))}</span><br>
+        <span class="dashboard-label">Log Channel ID:</span> <span class="dashboard-value">${escapeHTML(String(data.ticket_settings.log_channel_id))}</span><br>
+        <span class="dashboard-label">Rules:</span> <span class="dashboard-value">${escapeHTML(data.ticket_settings.rules_text || '')}</span><br>
+        <span class="dashboard-label">Ticket Message:</span> <span class="dashboard-value">${escapeHTML(data.ticket_settings.ticket_msg || '')}</span>
+    </div>`;
+    // Categories
+    if (data.ticket_categories && data.ticket_categories.length > 0) {
+        html += `<div class="dashboard-card"><span class="dashboard-label">Categories:</span><ul class="dashboard-list">`;
+        for (const cat of data.ticket_categories) {
+            html += `<li><b>${escapeHTML(cat.name)}</b>: ${escapeHTML(cat.description)}${cat.ping_on_create ? ' <span class="badge warn">Ping on create</span>' : ''}</li>`;
+        }
+        html += `</ul></div>`;
+    }
+    // Category roles
+    if (data.ticket_category_roles && Object.keys(data.ticket_category_roles).length > 0) {
+        html += `<div class="dashboard-card"><span class="dashboard-label">Category Roles:</span><table><tr><th>Category</th><th>Role IDs</th></tr>`;
+        for (const [cat, roles] of Object.entries(data.ticket_category_roles)) {
+            html += `<tr><td>${escapeHTML(cat)}</td><td>${roles.map(r => `<span class='dashboard-value'>${escapeHTML(String(r))}</span>`).join(', ')}</td></tr>`;
+        }
+        html += `</table></div>`;
+    }
+    ticketDiv.innerHTML = html;
+}
+
+function renderLoggingSection(data) {
+    const logDiv = document.getElementById('logging-section');
+    if (!data.log_settings) {
+        logDiv.innerHTML = `<div class="dashboard-card">Logging not set up.</div>`;
+        return;
+    }
+    let html = `<div class="dashboard-card">
+        <span class="dashboard-label">Log Channel ID:</span> <span class="dashboard-value">${escapeHTML(String(data.log_settings.log_channel_id))}</span><br>
+        <span class="dashboard-label">Mode:</span> <span class="dashboard-value">${escapeHTML(data.log_settings.mode)}</span><br>
+        <span class="dashboard-label">Events:</span> <span class="dashboard-value">${data.log_settings.events.map(e => `<span class='badge enabled'>${escapeHTML(e)}</span>`).join(' ')}</span><br>
+        <span class="dashboard-label">Selected Channels:</span> <span class="dashboard-value">${data.log_settings.selected_channels && data.log_settings.selected_channels.length > 0 ? data.log_settings.selected_channels.map(c => `<span class='dashboard-value'>${escapeHTML(String(c))}</span>`).join(', ') : 'All'}</span>
+    </div>`;
+    logDiv.innerHTML = html;
+}
+
+function renderLevelingSection(data) {
+    const levelDiv = document.getElementById('leveling-section');
+    let html = '';
+    if (data.leveling_settings) {
+        html += `<div class="dashboard-card">
+            <span class="dashboard-label">Level Up Message:</span> <span class="dashboard-value">${escapeHTML(data.leveling_settings.levelup_message || '')}</span><br>
+            <span class="dashboard-label">Channel ID:</span> <span class="dashboard-value">${escapeHTML(String(data.leveling_settings.channel_id))}</span>
+        </div>`;
+    } else {
+        html += `<div class="dashboard-card">Leveling not configured.</div>`;
+    }
+    // Level roles
+    if (data.level_roles && Object.keys(data.level_roles).length > 0) {
+        html += `<div class="dashboard-card"><span class="dashboard-label">Level Roles:</span><table><tr><th>Level</th><th>Role ID</th></tr>`;
+        for (const [lvl, roleId] of Object.entries(data.level_roles)) {
+            html += `<tr><td>${escapeHTML(lvl)}</td><td>${escapeHTML(String(roleId))}</td></tr>`;
+        }
+        html += `</table></div>`;
+    }
+    // Leaderboard
+    if (data.leaderboard && data.leaderboard.length > 0) {
+        html += `<div class="dashboard-card"><span class="dashboard-label">Leaderboard:</span><table><tr><th>#</th><th>User ID</th><th>Level</th><th>XP</th></tr>`;
+        data.leaderboard.forEach((u, i) => {
+            html += `<tr><td>${i+1}</td><td>${escapeHTML(String(u.user_id))}</td><td>${u.level}</td><td>${u.xp}</td></tr>`;
+        });
+        html += `</table></div>`;
+    } else {
+        html += `<div class="dashboard-card">No leaderboard data.</div>`;
+    }
+    levelDiv.innerHTML = html;
+}
+
 if (guildId) {
     fetch(`https://epic-bot-backend-production.up.railway.app/api/guild-dashboard?guild_id=${guildId}`)
         .then(res => res.json())
@@ -13,49 +115,20 @@ if (guildId) {
             const guildInfoDiv = document.getElementById('guild-info');
             guildInfoDiv.innerHTML = `<div class="dashboard-card">
                 <span class="dashboard-label">Guild ID:</span> <span class="dashboard-value">${escapeHTML(String(data.guild_info.id))}</span>
+                ${data.guild_info.name ? `<br><span class='dashboard-label'>Guild Name:</span> <span class='dashboard-value'>${escapeHTML(data.guild_info.name)}</span>` : ''}
             </div>`;
-
-            // Moderation Setup
-            const modDiv = document.getElementById('moderation-setup');
-            modDiv.innerHTML = `<div class="dashboard-card">
-                <span class="dashboard-label">Moderation Setup:</span> <span class="dashboard-value">${data.moderation_setup ? '✅ Complete' : '❌ Not Set Up'}</span>
-            </div>`;
-
-            // Ticket System
-            const ticketDiv = document.getElementById('ticket-system');
-            if (data.ticket_system) {
-                ticketDiv.innerHTML = `<div class="dashboard-card">
-                    <span class="dashboard-label">Panel Channel ID:</span> <span class="dashboard-value">${escapeHTML(String(data.ticket_system.channel_id))}</span><br>
-                    <span class="dashboard-label">Log Channel ID:</span> <span class="dashboard-value">${escapeHTML(String(data.ticket_system.log_channel_id))}</span><br>
-                    <span class="dashboard-label">Rules:</span> <span class="dashboard-value">${escapeHTML(data.ticket_system.rules_text || '')}</span><br>
-                    <span class="dashboard-label">Ticket Message:</span> <span class="dashboard-value">${escapeHTML(data.ticket_system.ticket_msg || '')}</span>
-                </div>`;
-            } else {
-                ticketDiv.innerHTML = `<div class="dashboard-card">Ticket system not set up.</div>`;
-            }
-
-            // Leveling Settings
-            const levelDiv = document.getElementById('leveling-settings');
-            if (data.leveling_settings) {
-                levelDiv.innerHTML = `<div class="dashboard-card">
-                    <span class="dashboard-label">Level Up Message:</span> <span class="dashboard-value">${escapeHTML(data.leveling_settings.levelup_message || '')}</span><br>
-                    <span class="dashboard-label">Channel ID:</span> <span class="dashboard-value">${escapeHTML(String(data.leveling_settings.channel_id))}</span>
-                </div>`;
-            } else {
-                levelDiv.innerHTML = `<div class="dashboard-card">Leveling not configured.</div>`;
-            }
-
-            // Leaderboard
-            const lbDiv = document.getElementById('leaderboard');
-            if (data.leaderboard && data.leaderboard.length > 0) {
-                lbDiv.innerHTML = `<div class="dashboard-card">
-                    <ul class="dashboard-list">
-                        ${data.leaderboard.map((u, i) => `<li>#${i+1} <span class="dashboard-label">User:</span> <span class="dashboard-value">${escapeHTML(String(u.user_id))}</span> <span class="dashboard-label">Level:</span> <span class="dashboard-value">${u.level}</span> <span class="dashboard-label">XP:</span> <span class="dashboard-value">${u.xp}</span></li>`).join('')}
-                    </ul>
-                </div>`;
-            } else {
-                lbDiv.innerHTML = `<div class="dashboard-card">No leaderboard data.</div>`;
-            }
+            renderModerationSection(data);
+            renderTicketSection(data);
+            renderLoggingSection(data);
+            renderLevelingSection(data);
+            // Collapsible logic for warnings
+            document.querySelectorAll('.collapsible').forEach(btn => {
+                btn.onclick = function() {
+                    this.classList.toggle("active");
+                    const content = this.nextElementSibling;
+                    content.style.display = content.style.display === "block" ? "none" : "block";
+                };
+            });
         })
         .catch(() => {
             document.getElementById('dashboard-root').innerHTML = '<div class="dashboard-card">Failed to load dashboard data.</div>';
