@@ -180,9 +180,11 @@ function handleLoginSection() {
                             guildsListDiv.querySelectorAll('.guild-card').forEach(card => {
                                 card.addEventListener('click', function(e) {
                                     e.preventDefault();
-                                    const guildId = this.getAttribute('data-guild-id');
+                                    const guildId = String(this.getAttribute('data-guild-id'));
+                                    // Debug log
+                                    console.log('Clicked guildId:', guildId, 'botGuilds:', botGuilds.map(String));
                                     // Always compare as strings for safety
-                                    if (botGuilds.map(String).includes(String(guildId))) {
+                                    if (botGuilds.map(String).includes(guildId)) {
                                         // Show empty dashboard page (for now, just clear the page and show a placeholder)
                                         document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;"><h1>Dashboard for Guild ID: ' + guildId + ' (Coming Soon)</h1></div>';
                                     } else {
