@@ -173,6 +173,130 @@ body {
     background: #4752c4;
 }
 
+.dashboard-title {
+    font-size: 2.2em;
+    font-weight: bold;
+    margin: 32px 0 12px 0;
+    color: #fff;
+    letter-spacing: 1px;
+}
+.dashboard-guild {
+    font-size: 1.1em;
+    color: #bdbdbd;
+    margin-bottom: 18px;
+}
+.dashboard-section-title {
+    font-size: 1.3em;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.dashboard-btn {
+    background: #5865f2;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-size: 1em;
+    cursor: pointer;
+    margin-left: 1rem;
+    transition: background 0.15s;
+}
+.dashboard-btn:hover {
+    background: #4752c4;
+}
+.dashboard-card {
+    background: #23272e;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.dashboard-label {
+    color: #a7a9be;
+    font-weight: 600;
+    margin-right: 6px;
+}
+.dashboard-value {
+    color: #fff;
+    font-weight: 500;
+}
+.badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 8px;
+    font-size: 0.95em;
+    font-weight: 600;
+    margin-left: 4px;
+    margin-right: 4px;
+    background: #23272e;
+    color: #bdbdbd;
+    border: 1px solid #23272e;
+}
+.badge.enabled {
+    background: #2cb67d;
+    color: #fff;
+    border: 1px solid #2cb67d;
+}
+.badge.warn {
+    background: #f5a524;
+    color: #fff;
+    border: 1px solid #f5a524;
+}
+.badge.disabled {
+    background: #7f5af0;
+    color: #fff;
+    border: 1px solid #7f5af0;
+}
+.collapsible {
+    background: #23272e;
+    color: #fff;
+    cursor: pointer;
+    padding: 10px 18px;
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    text-align: left;
+    outline: none;
+    font-size: 1.1em;
+    margin-bottom: 8px;
+    transition: background 0.2s;
+}
+.collapsible.active, .collapsible:hover {
+    background: #5865f2;
+}
+.collapsible-content {
+    display: none;
+    padding: 0 18px 12px 18px;
+    background: #20232a;
+    border-radius: 0 0 8px 8px;
+    margin-bottom: 12px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    background: #20232a;
+    border-radius: 8px;
+    overflow: hidden;
+}
+th, td {
+    padding: 10px 12px;
+    text-align: left;
+    color: #fff;
+}
+th {
+    background: #23272e;
+    color: #bdbdbd;
+    font-weight: 700;
+}
+td {
+    border-bottom: 1px solid #23272e;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
     .dashboard-container {
