@@ -18,6 +18,10 @@ body {
     display: flex;
     flex-direction: column;
     z-index: 10;
+    transition: width 0.2s;
+}
+.dashboard-nav.collapsed {
+    width: 60px;
 }
 .dashboard-nav .logo {
     font-size: 1.5rem;
@@ -28,6 +32,11 @@ body {
     display: flex;
     align-items: center;
     gap: 0.7rem;
+    transition: padding 0.2s, font-size 0.2s;
+}
+.dashboard-nav.collapsed .logo {
+    font-size: 1rem;
+    padding: 1rem 0.5rem 0.5rem 0.5rem;
 }
 .dashboard-nav .logo img {
     width: 36px;
@@ -45,13 +54,21 @@ body {
     margin: 0.5rem 0;
 }
 .dashboard-nav a {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
     color: #fff;
     text-decoration: none;
     padding: 0.9rem 2rem;
     font-size: 1.08rem;
     border-left: 4px solid transparent;
     transition: background 0.15s, border-color 0.15s, color 0.15s;
+    position: relative;
+}
+.dashboard-nav a .icon {
+    font-size: 1.3em;
+    width: 1.5em;
+    text-align: center;
 }
 .dashboard-nav a.active, .dashboard-nav a:hover {
     background: #1a1a24;
@@ -64,6 +81,19 @@ body {
     color: #a7a9be;
     border-top: 1px solid #232336;
 }
+.dashboard-nav .sidebar-toggle {
+    background: none;
+    border: none;
+    color: #7f5af0;
+    font-size: 1.5em;
+    cursor: pointer;
+    margin: 1em 0 0 1em;
+    align-self: flex-start;
+    transition: color 0.2s;
+}
+.dashboard-nav .sidebar-toggle:hover {
+    color: #2cb67d;
+}
 
 /* --- MAIN DASHBOARD LAYOUT --- */
 .dashboard-main {
@@ -71,6 +101,23 @@ body {
     padding: 2.5rem 2.5rem 2.5rem 2.5rem;
     min-height: 100vh;
     background: #16161a;
+    transition: margin-left 0.2s;
+}
+.dashboard-nav.collapsed ~ .dashboard-main {
+    margin-left: 60px;
+}
+
+/* --- PAGE SECTIONS --- */
+.dashboard-page {
+    display: none;
+    animation: fadeIn 0.3s;
+}
+.dashboard-page.active {
+    display: block;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: none; }
 }
 
 .dashboard-title {
