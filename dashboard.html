@@ -3,17 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Epic Bot Dashboard</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        .dashboard-section { margin-bottom: 2rem; }
-        .dashboard-title { font-size: 2rem; color: #7f5af0; margin-bottom: 1rem; }
-        .dashboard-subtitle { font-size: 1.2rem; color: #2cb67d; margin-bottom: 0.5rem; }
-        .dashboard-card { background: rgba(36,37,46,0.85); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.2rem; box-shadow: 0 2px 12px #0002; }
-        .dashboard-label { font-weight: bold; color: #fff; }
-        .dashboard-value { color: #a7a9be; }
-        .dashboard-list { list-style: none; padding: 0; }
-        .dashboard-list li { margin-bottom: 0.5rem; }
-    </style>
+    <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
     <div id="dashboard-root">
@@ -22,7 +12,7 @@
             <div id="guild-info"></div>
         </div>
         <div class="dashboard-section">
-            <div class="dashboard-subtitle">Moderation Setup</div>
+            <div class="dashboard-subtitle">Moderation</div>
             <div id="moderation-setup"></div>
         </div>
         <div class="dashboard-section">
@@ -30,12 +20,12 @@
             <div id="ticket-system"></div>
         </div>
         <div class="dashboard-section">
-            <div class="dashboard-subtitle">Leveling Settings</div>
-            <div id="leveling-settings"></div>
+            <div class="dashboard-subtitle">Logging</div>
+            <div id="logging-section"></div>
         </div>
         <div class="dashboard-section">
-            <div class="dashboard-subtitle">Leaderboard</div>
-            <div id="leaderboard"></div>
+            <div class="dashboard-subtitle">Leveling</div>
+            <div id="leveling-section"></div>
         </div>
     </div>
     <script src="dashboard.js"></script>
