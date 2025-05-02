@@ -152,7 +152,10 @@ function handleLoginSection() {
         fetch('https://epic-bot-backend-production.up.railway.app/api/bot-guilds')
             .then(res => res.json())
             .then(botGuilds => {
-                // Ensure all IDs are strings for comparison
+                if (!Array.isArray(botGuilds)) {
+                    console.error('botGuilds is not an array:', botGuilds);
+                    botGuilds = [];
+                }
                 const botGuildsSet = new Set(botGuilds.map(String));
                 const adminGuildsList = document.getElementById('admin-guilds-list');
                 if (adminGuildsList) {
