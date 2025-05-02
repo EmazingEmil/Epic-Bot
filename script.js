@@ -164,13 +164,22 @@ function handleLoginSection() {
                         const iconUrl = g.icon
                             ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`
                             : 'https://cdn.discordapp.com/embed/avatars/0.png';
+                        // Make each guild card clickable (future dashboard link)
                         return `
-                            <div class="guild-card">
+                            <a class="guild-card" href="#" data-guild-id="${g.id}" title="Go to dashboard for ${g.name}">
                                 <img class="guild-icon" src="${iconUrl}" alt="Server Icon">
                                 <div class="guild-name">${g.name}</div>
-                            </div>
+                            </a>
                         `;
                     }).join('');
+                    // Optionally, add a click handler for future dashboard navigation
+                    guildsListDiv.querySelectorAll('.guild-card').forEach(card => {
+                        card.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const guildId = this.getAttribute('data-guild-id');
+                            alert('In the future, this will open the dashboard for guild ID: ' + guildId);
+                        });
+                    });
                 }
             }
         }
