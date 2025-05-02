@@ -7,15 +7,16 @@
 </head>
 <body>
     <nav class="dashboard-nav">
+        <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar">☰</button>
         <div class="logo">
             <img src="Epic Bot.png" alt="Epic Bot Logo" /> Epic Bot
         </div>
         <ul>
-            <li><a href="#guild-info" class="active">Overview</a></li>
-            <li><a href="#moderation-setup">Moderation</a></li>
-            <li><a href="#ticket-system">Tickets</a></li>
-            <li><a href="#logging-section">Logging</a></li>
-            <li><a href="#leveling-section">Leveling</a></li>
+            <li><a href="#overview" class="active" data-page="overview"><span class="icon">🏠</span>Overview</a></li>
+            <li><a href="#moderation" data-page="moderation"><span class="icon">🛡️</span>Moderation</a></li>
+            <li><a href="#tickets" data-page="tickets"><spayn class="icon">🎫</span>Tickets</a></li>
+            <li><a href="#logging" data-page="logging"><span class="icon">📜</span>Logging</a></li>
+            <li><a href="#leveling" data-page="leveling"><span class="icon">🏆</span>Leveling</a></li>
         </ul>
         <div class="nav-footer">&copy; 2025 Epic Bot</div>
     </nav>
@@ -23,26 +24,26 @@
         <div class="dashboard-title">Epic Bot Dashboard</div>
         <div class="dashboard-guild" id="guild-name"></div>
         <div id="dashboard-root">
-            <div class="dashboard-section" id="guild-info-section">
+            <section class="dashboard-page active" id="page-overview">
                 <div class="dashboard-section-title"><span>Guild Overview</span></div>
                 <div id="guild-info"></div>
-            </div>
-            <div class="dashboard-section" id="moderation-section">
+            </section>
+            <section class="dashboard-page" id="page-moderation">
                 <div class="dashboard-section-title"><span>Moderation</span> <button class="dashboard-btn" id="mod-settings-btn">Settings</button></div>
                 <div id="moderation-setup"></div>
-            </div>
-            <div class="dashboard-section" id="ticket-section">
+            </section>
+            <section class="dashboard-page" id="page-tickets">
                 <div class="dashboard-section-title"><span>Ticket System</span> <button class="dashboard-btn" id="ticket-settings-btn">Settings</button></div>
                 <div id="ticket-system"></div>
-            </div>
-            <div class="dashboard-section" id="logging-section">
+            </section>
+            <section class="dashboard-page" id="page-logging">
                 <div class="dashboard-section-title"><span>Logging</span> <button class="dashboard-btn" id="log-settings-btn">Settings</button></div>
                 <div id="logging-section"></div>
-            </div>
-            <div class="dashboard-section" id="leveling-section">
+            </section>
+            <section class="dashboard-page" id="page-leveling">
                 <div class="dashboard-section-title"><span>Leveling</span> <button class="dashboard-btn" id="level-settings-btn">Settings</button></div>
                 <div id="leveling-section"></div>
-            </div>
+            </section>
         </div>
     </main>
     <script src="dashboard.js"></script>
