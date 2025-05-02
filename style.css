@@ -122,6 +122,68 @@ main {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* --- Login Section Styles --- */
+#login.page-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    background: rgba(36, 37, 46, 0.85);
+    border-radius: 18px;
+    box-shadow: 0 4px 32px #7f5af033;
+    padding: 3rem 2rem 2rem 2rem;
+    margin-top: 2.5rem;
+    max-width: 500px;
+}
+#login h2, #login h3 {
+    color: var(--primary);
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    text-align: center;
+    letter-spacing: 1px;
+}
+#login .guilds-list {
+    margin-top: 1.5rem;
+}
+#discord-login-btn {
+    background: var(--gradient);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    padding: 1rem 2.5rem;
+    margin-bottom: 1.5rem;
+    margin-top: 0.5rem;
+    box-shadow: 0 2px 16px #7f5af055;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+    outline: none;
+}
+#discord-login-btn:hover, #discord-login-btn:focus {
+    background: linear-gradient(90deg, #2cb67d 0%, #7f5af0 100%);
+    box-shadow: 0 4px 24px #7f5af055;
+    transform: translateY(-2px) scale(1.04);
+}
+#admin-guilds-list {
+    width: 100%;
+    margin-top: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#admin-guilds-list > h3 {
+    color: var(--secondary);
+    font-size: 1.3rem;
+    margin-bottom: 0.7rem;
+}
+#admin-guilds-list > p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 1.2rem;
+}
+
 .glass {
   background: var(--glass);
   border: 1px solid var(--border);
