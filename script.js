@@ -125,4 +125,48 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => {
             console.error('Error contacting backend:', error);
         });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('user_id');
+    const username = urlParams.get('username');
+    const guildCount = urlParams.get('guilds');
+
+    if (userId && username) {
+        const loginSection = document.getElementById('login');
+        if (loginSection) {
+            loginSection.innerHTML = `
+                <div id="user-info">
+                    <p>Welcome, <strong>${username}</strong>!</p>
+                    <p>You are an admin in <strong>${guildCount}</strong> servers.</p>
+                </div>
+                <div id="admin-guilds-list">
+                    <h3>Your Admin Servers:</h3>
+                    <div class="guilds-list"></div>
+                </div>
+            `;
+
+            // Fetch and display the admin guilds
+            fetch(`https://epic-bot-backend-production.up.railway.app/admin-guilds?user_id=${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const guildsListDiv = document.querySelector('.guilds-list');
+                    if (guildsListDiv && data.guilds) {
+                        guildsListDiv.innerHTML = data.guilds.map(g => {
+                            const iconUrl = g.icon
+                                ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`
+                                : 'https://cdn.discordapp.com/embed/avatars/0.png';
+                            return `
+                                <div class="guild-card">
+                                    <img class="guild-icon" src="${iconUrl}" alt="Server Icon">
+                                    <div class="guild-name">${g.name}</div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching admin guilds:', error);
+                });
+        }
+    }
 });
