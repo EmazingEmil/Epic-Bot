@@ -90,10 +90,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('Admin guilds:', data.admin_guilds);
                 const listDiv = document.getElementById('admin-guilds-list');
                 if (listDiv && data.admin_guilds) {
-                    listDiv.innerHTML = '<h3>Your Admin Guilds:</h3>' +
-                        '<ul>' +
-                        data.admin_guilds.map(g => `<li>${g.name} (${g.id})</li>`).join('') +
-                        '</ul>';
+                    if (data.admin_guilds.length === 0) {
+                        listDiv.innerHTML = '<p>You are not an admin in any servers.</p>';
+                    } else {
+                        listDiv.innerHTML = '<h3>Your Admin Servers:</h3>' +
+                            '<div class="guilds-list">' +
+                            data.admin_guilds.map(g => {
+                                const iconUrl = g.icon
+                                    ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`
+                                    : 'https://cdn.discordapp.com/embed/avatars/0.png';
+                                return `
+                                    <div class="guild-card">
+                                        <img class="guild-icon" src="${iconUrl}" alt="Server Icon">
+                                        <div class="guild-name">${g.name}</div>
+                                    </div>
+                                `;
+                            }).join('') +
+                            '</div>';
+                    }
                 }
             })
             .catch(error => {
