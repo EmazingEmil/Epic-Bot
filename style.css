@@ -274,6 +274,7 @@ main {
   gap: 1.5rem;
   margin-top: 1rem;
   justify-content: flex-start;
+  align-items: flex-start;
 }
 
 .guild-card {
@@ -286,12 +287,17 @@ main {
   align-items: center;
   min-width: 140px;
   max-width: 180px;
-  transition: box-shadow 0.2s;
+  transition: box-shadow 0.2s, background 0.2s, transform 0.2s;
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+  border: none;
 }
 
-.guild-card:hover {
+.guild-card:hover, .guild-card:focus {
   box-shadow: 0 4px 24px #7f5af055;
   background: rgba(255,255,255,0.13);
+  transform: translateY(-4px) scale(1.04);
 }
 
 .guild-icon {
@@ -310,6 +316,7 @@ main {
   color: #fff;
   text-align: center;
   word-break: break-word;
+  margin-top: 0.3rem;
 }
 
 .commands-list {
