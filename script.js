@@ -148,10 +148,12 @@ function handleLoginSection() {
     }
 
     if (userId && username) {
-        // Fetch the bot's guilds from the backend
+        // Fetch the bot's guilds from the backend as soon as login is successful
         fetch('https://epic-bot-backend-production.up.railway.app/api/bot-guilds')
             .then(res => res.json())
             .then(botGuilds => {
+                // Ensure all IDs are strings for comparison
+                const botGuildsSet = new Set(botGuilds.map(String));
                 const adminGuildsList = document.getElementById('admin-guilds-list');
                 if (adminGuildsList) {
                     adminGuildsList.innerHTML = `
@@ -168,11 +170,14 @@ function handleLoginSection() {
                                 const iconUrl = g.icon
                                     ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`
                                     : 'https://cdn.discordapp.com/embed/avatars/0.png';
-                                // Make each guild card a button for accessibility and clickability
+                                // Mark if bot is in this guild
+                                const inBot = botGuildsSet.has(String(g.id));
+                                console.log(`Checking guild: ${g.name} (${g.id}) - Bot in server:`, inBot);
                                 return `
-                                    <button class="guild-card" data-guild-id="${g.id}" title="Go to dashboard for ${g.name}">
+                                    <button class="guild-card" data-guild-id="${g.id}" title="Go to dashboard for ${g.name}" style="border: ${inBot ? '2px solid #2cb67d' : '2px solid #7f5af0'}">
                                         <img class="guild-icon" src="${iconUrl}" alt="Server Icon">
                                         <div class="guild-name">${g.name}</div>
+                                        ${inBot ? '<div style="color:#2cb67d;font-size:0.95rem;margin-top:0.3rem;">Bot is in this server</div>' : '<div style="color:#7f5af0;font-size:0.95rem;margin-top:0.3rem;">Invite bot</div>'}
                                     </button>
                                 `;
                             }).join('');
@@ -181,14 +186,12 @@ function handleLoginSection() {
                                 card.addEventListener('click', function(e) {
                                     e.preventDefault();
                                     const guildId = String(this.getAttribute('data-guild-id'));
-                                    // Debug log
-                                    console.log('Clicked guildId:', guildId, 'botGuilds:', botGuilds.map(String));
-                                    // Always compare as strings for safety
-                                    if (botGuilds.map(String).includes(guildId)) {
-                                        // Show empty dashboard page (for now, just clear the page and show a placeholder)
+                                    const isInBot = botGuildsSet.has(guildId);
+                                    console.log(`Clicked guild: ${guildId} - Bot in server:`, isInBot);
+                                    // Check if bot is in the server using the Set for O(1) lookup
+                                    if (isInBot) {
                                         document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;"><h1>Dashboard for Guild ID: ' + guildId + ' (Coming Soon)</h1></div>';
                                     } else {
-                                        // Redirect to Discord bot invite link for that server
                                         const clientId = '1337542083493232650'; // Your bot's client ID
                                         const permissions = '8'; // Admin perms
                                         const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&scope=bot+applications.commands&permissions=${permissions}&guild_id=${guildId}&disable_guild_select=true`;
