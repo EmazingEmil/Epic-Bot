@@ -171,12 +171,12 @@ function handleLoginSection() {
                         const iconUrl = g.icon
                             ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`
                             : 'https://cdn.discordapp.com/embed/avatars/0.png';
-                        // Make each guild card clickable (future dashboard link)
+                        // Make each guild card a button for accessibility and clickability
                         return `
-                            <a class="guild-card" href="#" data-guild-id="${g.id}" title="Go to dashboard for ${g.name}">
+                            <button class="guild-card" data-guild-id="${g.id}" title="Go to dashboard for ${g.name}">
                                 <img class="guild-icon" src="${iconUrl}" alt="Server Icon">
                                 <div class="guild-name">${g.name}</div>
-                            </a>
+                            </button>
                         `;
                     }).join('');
                     // Add click handler for dashboard/invite logic
