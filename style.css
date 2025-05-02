@@ -133,7 +133,8 @@ main {
     box-shadow: 0 4px 32px #7f5af033;
     padding: 3rem 2rem 2rem 2rem;
     margin-top: 2.5rem;
-    max-width: 500px;
+    max-width: 900px;
+    width: 100%;
 }
 #login h2, #login h3 {
     color: var(--primary);
