@@ -1,0 +1,121 @@
+body {
+    background: #16161a;
+    color: #fff;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.dashboard-section {
+    margin-bottom: 2rem;
+}
+
+.dashboard-title {
+    font-size: 2.2rem;
+    color: #7f5af0;
+    margin-bottom: 1.2rem;
+    letter-spacing: 1px;
+}
+
+.dashboard-subtitle {
+    font-size: 1.2rem;
+    color: #2cb67d;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.dashboard-card {
+    background: rgba(36,37,46,0.92);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 1.2rem;
+    box-shadow: 0 2px 12px #0003;
+    transition: box-shadow 0.2s;
+}
+.dashboard-card:hover {
+    box-shadow: 0 4px 24px #7f5af055;
+}
+
+.dashboard-label {
+    font-weight: bold;
+    color: #fff;
+}
+
+.dashboard-value {
+    color: #a7a9be;
+}
+
+.dashboard-list {
+    list-style: none;
+    padding: 0;
+}
+
+.dashboard-list li {
+    margin-bottom: 0.5rem;
+}
+
+.collapsible {
+    background: #232336;
+    color: #fff;
+    cursor: pointer;
+    padding: 0.7rem 1.2rem;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    transition: background 0.2s;
+}
+.collapsible.active, .collapsible:hover {
+    background: #2cb67d;
+    color: #fff;
+}
+.collapsible-content {
+    display: none;
+    padding: 0 1rem 1rem 1rem;
+    border-radius: 0 0 8px 8px;
+    background: rgba(36,37,46,0.7);
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.2em 0.7em;
+    border-radius: 8px;
+    font-size: 0.95em;
+    font-weight: 600;
+    margin-left: 0.5em;
+}
+.badge.enabled {
+    background: #2cb67d;
+    color: #fff;
+}
+.badge.disabled {
+    background: #ff5c5c;
+    color: #fff;
+}
+.badge.warn {
+    background: #ffd166;
+    color: #232336;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.5rem 0;
+    background: transparent;
+}
+th, td {
+    padding: 0.5rem;
+    border-bottom: 1px solid #232336;
+    text-align: left;
+}
+th {
+    color: #7f5af0;
+    font-weight: 700;
+    background: #232336;
+}
+tr:hover td {
+    background: #23233644;
+}
