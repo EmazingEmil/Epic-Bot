@@ -40,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Enable footer quick links navigation
     const footerLinks = document.querySelectorAll('.footer-link');
     footerLinks.forEach(link => {
         link.addEventListener('click', e => {
@@ -84,13 +83,10 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // If redirected back from Discord OAuth2, fetch and display admin guilds
     if (window.location.search.includes('code=')) {
         fetch('https://epic-bot-backend-production.up.railway.app/login/callback' + window.location.search)
             .then(response => response.json())
             .then(data => {
-                console.log('Discord user:', data.user);
-                console.log('Admin guilds:', data.admin_guilds);
                 const listDiv = document.getElementById('admin-guilds-list');
                 if (listDiv && data.admin_guilds) {
                     if (data.admin_guilds.length === 0) {
@@ -121,9 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch('https://epic-bot-backend-production.up.railway.app/')
         .then(response => response.json())
         .then(data => {
-            console.log('Backend response:', data);
             // Optionally, show it on the page:
- })
+        })
         .catch(error => {
             console.error('Error contacting backend:', error);
         });
@@ -148,12 +143,10 @@ function handleLoginSection() {
     }
 
     if (userId && username) {
-        // Fetch the bot's guilds from the backend as soon as login is successful
         fetch('https://epic-bot-backend-production.up.railway.app/api/bot-guilds')
             .then(res => res.json())
             .then(botGuilds => {
                 if (!Array.isArray(botGuilds)) {
-                    console.error('botGuilds is not an array:', botGuilds);
                     botGuilds = [];
                 }
                 const botGuildsSet = new Set(botGuilds.map(String));
@@ -173,9 +166,7 @@ function handleLoginSection() {
                                 const iconUrl = g.icon
                                     ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`
                                     : 'https://cdn.discordapp.com/embed/avatars/0.png';
-                                // Mark if bot is in this guild
                                 const inBot = botGuildsSet.has(String(g.id));
-                                console.log(`Checking guild: ${g.name} (${g.id}) - Bot in server:`, inBot);
                                 return `
                                     <button class="guild-card" data-guild-id="${g.id}" title="Go to dashboard for ${g.name}" style="border: ${inBot ? '2px solid #2cb67d' : '2px solid #7f5af0'}">
                                         <img class="guild-icon" src="${iconUrl}" alt="Server Icon">
@@ -184,19 +175,16 @@ function handleLoginSection() {
                                     </button>
                                 `;
                             }).join('');
-                            // Add click handler for dashboard/invite logic
                             guildsListDiv.querySelectorAll('.guild-card').forEach(card => {
                                 card.addEventListener('click', function(e) {
                                     e.preventDefault();
                                     const guildId = String(this.getAttribute('data-guild-id'));
                                     const isInBot = botGuildsSet.has(guildId);
-                                    console.log(`Clicked guild: ${guildId} - Bot in server:`, isInBot);
-                                    // Check if bot is in the server using the Set for O(1) lookup
                                     if (isInBot) {
-                                        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;"><h1>Dashboard for Guild ID: ' + guildId + ' (Coming Soon)</h1></div>';
+                                        window.location.href = `dashboard.html?guild_id=${guildId}`;
                                     } else {
-                                        const clientId = '1337542083493232650'; // Your bot's client ID
-                                        const permissions = '8'; // Admin perms
+                                        const clientId = '1337542083493232650';
+                                        const permissions = '8';
                                         const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&scope=bot+applications.commands&permissions=${permissions}&guild_id=${guildId}&disable_guild_select=true`;
                                         window.location.href = inviteUrl;
                                     }
