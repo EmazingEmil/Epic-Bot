@@ -137,35 +137,41 @@ function handleLoginSection() {
     const urlParams = new URLSearchParams(window.location.search);
     const userId = urlParams.get('user_id');
     const username = urlParams.get('username');
-    const guildCount = urlParams.get('guilds');
+    const guildsJson = urlParams.get('guilds');
+    let guilds = [];
+    if (guildsJson) {
+        try {
+            guilds = JSON.parse(decodeURIComponent(guildsJson));
+        } catch (e) {
+            guilds = [];
+        }
+    }
 
     if (userId && username) {
         const adminGuildsList = document.getElementById('admin-guilds-list');
         if (adminGuildsList) {
             adminGuildsList.innerHTML = `
                 <h3>Welcome, <strong>${username}</strong>!</h3>
-                <p>You are an admin in <strong>${guildCount}</strong> servers.</p>
+                <p>You are an admin in <strong>${guilds.length}</strong> servers.</p>
                 <div class="guilds-list"></div>
             `;
-            // Simulate guilds for demo
-            const guilds = Array.from({ length: parseInt(guildCount) }, (_, i) => ({
-                id: i + 1,
-                name: `Guild ${i + 1}`,
-                icon: null
-            }));
             const guildsListDiv = adminGuildsList.querySelector('.guilds-list');
             if (guildsListDiv) {
-                guildsListDiv.innerHTML = guilds.map(g => {
-                    const iconUrl = g.icon
-                        ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`
-                        : 'https://cdn.discordapp.com/embed/avatars/0.png';
-                    return `
-                        <div class="guild-card">
-                            <img class="guild-icon" src="${iconUrl}" alt="Server Icon">
-                            <div class="guild-name">${g.name}</div>
-                        </div>
-                    `;
-                }).join('');
+                if (guilds.length === 0) {
+                    guildsListDiv.innerHTML = '<p>You are not an admin in any servers.</p>';
+                } else {
+                    guildsListDiv.innerHTML = guilds.map(g => {
+                        const iconUrl = g.icon
+                            ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`
+                            : 'https://cdn.discordapp.com/embed/avatars/0.png';
+                        return `
+                            <div class="guild-card">
+                                <img class="guild-icon" src="${iconUrl}" alt="Server Icon">
+                                <div class="guild-name">${g.name}</div>
+                            </div>
+                        `;
+                    }).join('');
+                }
             }
         }
     }
