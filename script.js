@@ -171,7 +171,7 @@ function handleLoginSection() {
                                     <button class="guild-card" data-guild-id="${g.id}" title="Go to dashboard for ${g.name}" style="border: ${inBot ? '2px solid #2cb67d' : '2px solid #7f5af0'}">
                                         <img class="guild-icon" src="${iconUrl}" alt="Server Icon">
                                         <div class="guild-name">${g.name}</div>
-                                        ${inBot ? '<div style="color:#2cb67d;font-size:0.95rem;margin-top:0.3rem;">Bot is in this server</div>' : '<div style="color:#7f5af0;font-size:0.95rem;margin-top:0.3rem;">Invite bot</div>'}
+                                        ${inBot ? '<div style="color:#2cb67d;font-size:0.95rem;margin-top:0.3rem;">Manage server</div>' : '<div style="color:#7f5af0;font-size:0.95rem;margin-top:0.3rem;">Invite bot</div>'}
                                     </button>
                                 `;
                             }).join('');
