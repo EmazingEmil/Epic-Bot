@@ -73,4 +73,15 @@ document.addEventListener('DOMContentLoaded', () => {
             botAvatar.style.boxShadow = '0 0 32px #7f5af055';
         });
     }
+
+    fetch('https://epic-bot-backend-production.up.railway.app/')
+        .then(response => response.json())
+        .then(data => {
+            console.log('Backend response:', data);
+            // Optionally, show it on the page:
+            document.body.insertAdjacentHTML('beforeend', `<pre>${JSON.stringify(data, null, 2)}</pre>`);
+        })
+        .catch(error => {
+            console.error('Error contacting backend:', error);
+        });
 });
