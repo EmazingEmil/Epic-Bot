@@ -74,6 +74,33 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const loginBtn = document.getElementById('discord-login-btn');
+    if (loginBtn) {
+        loginBtn.onclick = function() {
+            window.location.href = 'https://epic-bot-backend-production.up.railway.app/login/discord';
+        };
+    }
+
+    // If redirected back from Discord OAuth2, fetch and display admin guilds
+    if (window.location.search.includes('code=')) {
+        fetch('https://epic-bot-backend-production.up.railway.app/login/callback' + window.location.search)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Discord user:', data.user);
+                console.log('Admin guilds:', data.admin_guilds);
+                const listDiv = document.getElementById('admin-guilds-list');
+                if (listDiv && data.admin_guilds) {
+                    listDiv.innerHTML = '<h3>Your Admin Guilds:</h3>' +
+                        '<ul>' +
+                        data.admin_guilds.map(g => `<li>${g.name} (${g.id})</li>`).join('') +
+                        '</ul>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching admin guilds:', error);
+            });
+    }
+
     fetch('https://epic-bot-backend-production.up.railway.app/')
         .then(response => response.json())
         .then(data => {
