@@ -120,8 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             console.log('Backend response:', data);
             // Optionally, show it on the page:
-            document.body.insertAdjacentHTML('beforeend', `<pre>${JSON.stringify(data, null, 2)}</pre>`);
-        })
+ })
         .catch(error => {
             console.error('Error contacting backend:', error);
         });
@@ -132,24 +131,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const guildCount = urlParams.get('guilds');
 
     if (userId && username) {
-        const loginSection = document.getElementById('login');
-        if (loginSection) {
-            loginSection.innerHTML = `
-                <div id="user-info">
-                    <p>Welcome, <strong>${username}</strong>!</p>
-                    <p>You are an admin in <strong>${guildCount}</strong> servers.</p>
-                </div>
-                <div id="admin-guilds-list">
-                    <h3>Your Admin Servers:</h3>
-                    <div class="guilds-list"></div>
-                </div>
+        const adminGuildsList = document.getElementById('admin-guilds-list');
+        if (adminGuildsList) {
+            adminGuildsList.innerHTML = `
+                <h3>Welcome, <strong>${username}</strong>!</h3>
+                <p>You are an admin in <strong>${guildCount}</strong> servers.</p>
+                <div class="guilds-list"></div>
             `;
 
             // Fetch and display the admin guilds
             fetch(`https://epic-bot-backend-production.up.railway.app/admin-guilds?user_id=${userId}`)
                 .then(response => response.json())
                 .then(data => {
-                    const guildsListDiv = document.querySelector('.guilds-list');
+                    const guildsListDiv = adminGuildsList.querySelector('.guilds-list');
                     if (guildsListDiv && data.guilds) {
                         guildsListDiv.innerHTML = data.guilds.map(g => {
                             const iconUrl = g.icon
