@@ -6,28 +6,105 @@ body {
     padding: 0;
 }
 
-.dashboard-section {
-    margin-bottom: 2rem;
+/* --- NAVIGATION SIDEBAR --- */
+.dashboard-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 220px;
+    height: 100vh;
+    background: #232336;
+    box-shadow: 2px 0 12px #0002;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+}
+.dashboard-nav .logo {
+    font-size: 1.5rem;
+    color: #7f5af0;
+    font-weight: bold;
+    padding: 2rem 1.5rem 1rem 1.5rem;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+.dashboard-nav .logo img {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #fff;
+}
+.dashboard-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex: 1;
+}
+.dashboard-nav li {
+    margin: 0.5rem 0;
+}
+.dashboard-nav a {
+    display: block;
+    color: #fff;
+    text-decoration: none;
+    padding: 0.9rem 2rem;
+    font-size: 1.08rem;
+    border-left: 4px solid transparent;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.dashboard-nav a.active, .dashboard-nav a:hover {
+    background: #1a1a24;
+    color: #2cb67d;
+    border-left: 4px solid #7f5af0;
+}
+.dashboard-nav .nav-footer {
+    padding: 1.5rem 2rem;
+    font-size: 0.95rem;
+    color: #a7a9be;
+    border-top: 1px solid #232336;
+}
+
+/* --- MAIN DASHBOARD LAYOUT --- */
+.dashboard-main {
+    margin-left: 220px;
+    padding: 2.5rem 2.5rem 2.5rem 2.5rem;
+    min-height: 100vh;
+    background: #16161a;
 }
 
 .dashboard-title {
-    font-size: 2.2rem;
+    font-size: 2.5rem;
     color: #7f5af0;
-    margin-bottom: 1.2rem;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
     letter-spacing: 1px;
 }
-
-.dashboard-subtitle {
+.dashboard-guild {
     font-size: 1.2rem;
+    color: #a7a9be;
+    margin-bottom: 2rem;
+}
+
+.dashboard-section {
+    margin-bottom: 2.5rem;
+}
+
+.dashboard-section-title {
+    font-size: 1.3rem;
     color: #2cb67d;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
     font-weight: 600;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .dashboard-card {
-    background: rgba(36,37,46,0.92);
+    background: rgba(36,37,46,0.97);
     border-radius: 1rem;
-    padding: 1.5rem;
+    padding: 1.5rem 2rem;
     margin-bottom: 1.2rem;
     box-shadow: 0 2px 12px #0003;
     transition: box-shadow 0.2s;
@@ -36,11 +113,28 @@ body {
     box-shadow: 0 4px 24px #7f5af055;
 }
 
+.dashboard-btn {
+    background: #7f5af0;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.7em 1.5em;
+    font-size: 1.08rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 0.3em 0.5em 0.3em 0;
+    transition: background 0.15s, color 0.15s;
+    box-shadow: 0 1px 4px #0002;
+}
+.dashboard-btn:hover {
+    background: #2cb67d;
+    color: #fff;
+}
+
 .dashboard-label {
     font-weight: bold;
     color: #fff;
 }
-
 .dashboard-value {
     color: #a7a9be;
 }
@@ -49,7 +143,6 @@ body {
     list-style: none;
     padding: 0;
 }
-
 .dashboard-list li {
     margin-bottom: 0.5rem;
 }
@@ -118,4 +211,22 @@ th {
 }
 tr:hover td {
     background: #23233644;
+}
+
+@media (max-width: 900px) {
+    .dashboard-nav {
+        width: 60px;
+    }
+    .dashboard-main {
+        margin-left: 60px;
+        padding: 1rem;
+    }
+    .dashboard-nav .logo {
+        font-size: 1rem;
+        padding: 1rem 0.5rem 0.5rem 0.5rem;
+    }
+    .dashboard-nav a {
+        padding: 0.7rem 0.7rem;
+        font-size: 1rem;
+    }
 }
