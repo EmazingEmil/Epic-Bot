@@ -139,28 +139,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="guilds-list"></div>
             `;
 
-            // Fetch and display the admin guilds
-            fetch(`https://epic-bot-backend-production.up.railway.app/admin-guilds?user_id=${userId}`)
-                .then(response => response.json())
-                .then(data => {
-                    const guildsListDiv = adminGuildsList.querySelector('.guilds-list');
-                    if (guildsListDiv && data.guilds) {
-                        guildsListDiv.innerHTML = data.guilds.map(g => {
-                            const iconUrl = g.icon
-                                ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`
-                                : 'https://cdn.discordapp.com/embed/avatars/0.png';
-                            return `
-                                <div class="guild-card">
-                                    <img class="guild-icon" src="${iconUrl}" alt="Server Icon">
-                                    <div class="guild-name">${g.name}</div>
-                                </div>
-                            `;
-                        }).join('');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching admin guilds:', error);
-                });
+            // Simulate fetching admin guilds (replace with actual API call if needed)
+            const guilds = Array.from({ length: parseInt(guildCount) }, (_, i) => ({
+                id: i + 1,
+                name: `Guild ${i + 1}`,
+                icon: null
+            }));
+
+            const guildsListDiv = adminGuildsList.querySelector('.guilds-list');
+            if (guildsListDiv) {
+                guildsListDiv.innerHTML = guilds.map(g => {
+                    const iconUrl = g.icon
+                        ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`
+                        : 'https://cdn.discordapp.com/embed/avatars/0.png';
+                    return `
+                        <div class="guild-card">
+                            <img class="guild-icon" src="${iconUrl}" alt="Server Icon">
+                            <div class="guild-name">${g.name}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
         }
     }
 });
