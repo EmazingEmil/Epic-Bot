@@ -107,6 +107,36 @@ function renderLevelingSection(data) {
     levelDiv.innerHTML = html;
 }
 
+// Sidebar navigation logic
+const sidebar = document.querySelector('.dashboard-nav');
+const sidebarToggle = document.getElementById('sidebar-toggle');
+const navLinks = document.querySelectorAll('.dashboard-nav a[data-page]');
+const pages = document.querySelectorAll('.dashboard-page');
+
+sidebarToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+    document.querySelector('.dashboard-main').classList.toggle('collapsed');
+});
+
+navLinks.forEach(link => {
+    link.addEventListener('click', e => {
+        e.preventDefault();
+        navLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        const page = link.getAttribute('data-page');
+        pages.forEach(sec => {
+            if (sec.id === `page-${page}`) {
+                sec.classList.add('active');
+            } else {
+                sec.classList.remove('active');
+            }
+        });
+    });
+});
+
+// Example: Set guild name (replace with actual data fetch)
+document.getElementById('guild-name').textContent = 'Your Server Name';
+
 if (guildId) {
     fetch(`https://epic-bot-backend-production.up.railway.app/api/guild-dashboard?guild_id=${guildId}`)
         .then(res => res.json())
