@@ -128,35 +128,33 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error contacting backend:', error);
         });
 
+    handleLoginSection();
+});
+
+window.addEventListener('hashchange', handleLoginSection);
+
+function handleLoginSection() {
     const urlParams = new URLSearchParams(window.location.search);
     const userId = urlParams.get('user_id');
     const username = urlParams.get('username');
     const guildCount = urlParams.get('guilds');
 
-    console.log('Query parameters:', { userId, username, guildCount });
-
     if (userId && username) {
         const adminGuildsList = document.getElementById('admin-guilds-list');
         if (adminGuildsList) {
-            console.log('Found admin-guilds-list div:', adminGuildsList);
             adminGuildsList.innerHTML = `
                 <h3>Welcome, <strong>${username}</strong>!</h3>
                 <p>You are an admin in <strong>${guildCount}</strong> servers.</p>
                 <div class="guilds-list"></div>
             `;
-
-            // Simulate fetching admin guilds (replace with actual API call if needed)
+            // Simulate guilds for demo
             const guilds = Array.from({ length: parseInt(guildCount) }, (_, i) => ({
                 id: i + 1,
                 name: `Guild ${i + 1}`,
                 icon: null
             }));
-
-            console.log('Simulated guild data:', guilds);
-
             const guildsListDiv = adminGuildsList.querySelector('.guilds-list');
             if (guildsListDiv) {
-                console.log('Found guilds-list div:', guildsListDiv);
                 guildsListDiv.innerHTML = guilds.map(g => {
                     const iconUrl = g.icon
                         ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`
@@ -168,14 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     `;
                 }).join('');
-                console.log('Guilds added to guilds-list div.');
-            } else {
-                console.error('guilds-list div not found inside admin-guilds-list.');
             }
-        } else {
-            console.error('admin-guilds-list div not found in the DOM.');
         }
-    } else {
-        console.warn('Query parameters missing or invalid.');
     }
-});
+}
