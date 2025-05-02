@@ -147,58 +147,56 @@ function handleLoginSection() {
         }
     }
 
-    // List of server IDs where the bot is present (for demo, replace with real data in the future)
-    const botGuilds = [
-        // Add your bot's server IDs here for demo/testing
-        '1365966790521258005', // Example: Epic Bot
-        // ...add more IDs as needed
-    ];
-
     if (userId && username) {
-        const adminGuildsList = document.getElementById('admin-guilds-list');
-        if (adminGuildsList) {
-            adminGuildsList.innerHTML = `
-                <h3>Welcome, <strong>${username}</strong>!</h3>
-                <p>You are an admin in <strong>${guilds.length}</strong> servers.</p>
-                <div class="guilds-list"></div>
-            `;
-            const guildsListDiv = adminGuildsList.querySelector('.guilds-list');
-            if (guildsListDiv) {
-                if (guilds.length === 0) {
-                    guildsListDiv.innerHTML = '<p>You are not an admin in any servers.</p>';
-                } else {
-                    guildsListDiv.innerHTML = guilds.map(g => {
-                        const iconUrl = g.icon
-                            ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`
-                            : 'https://cdn.discordapp.com/embed/avatars/0.png';
-                        // Make each guild card a button for accessibility and clickability
-                        return `
-                            <button class="guild-card" data-guild-id="${g.id}" title="Go to dashboard for ${g.name}">
-                                <img class="guild-icon" src="${iconUrl}" alt="Server Icon">
-                                <div class="guild-name">${g.name}</div>
-                            </button>
-                        `;
-                    }).join('');
-                    // Add click handler for dashboard/invite logic
-                    guildsListDiv.querySelectorAll('.guild-card').forEach(card => {
-                        card.addEventListener('click', function(e) {
-                            e.preventDefault();
-                            const guildId = this.getAttribute('data-guild-id');
-                            // Check if bot is in the server
-                            if (botGuilds.includes(guildId)) {
-                                // Show empty dashboard page (for now, just clear the page and show a placeholder)
-                                document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;"><h1>Dashboard for Guild ID: ' + guildId + ' (Coming Soon)</h1></div>';
-                            } else {
-                                // Redirect to Discord bot invite link for that server
-                                const clientId = '1337542083493232650'; // Your bot's client ID
-                                const permissions = '8'; // Admin perms
-                                const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&scope=bot+applications.commands&permissions=${permissions}&guild_id=${guildId}&disable_guild_select=true`;
-                                window.location.href = inviteUrl;
-                            }
-                        });
-                    });
+        // Fetch the bot's guilds from the backend
+        fetch('https://epic-bot-backend-production.up.railway.app/api/bot-guilds')
+            .then(res => res.json())
+            .then(botGuilds => {
+                const adminGuildsList = document.getElementById('admin-guilds-list');
+                if (adminGuildsList) {
+                    adminGuildsList.innerHTML = `
+                        <h3>Welcome, <strong>${username}</strong>!</h3>
+                        <p>You are an admin in <strong>${guilds.length}</strong> servers.</p>
+                        <div class="guilds-list"></div>
+                    `;
+                    const guildsListDiv = adminGuildsList.querySelector('.guilds-list');
+                    if (guildsListDiv) {
+                        if (guilds.length === 0) {
+                            guildsListDiv.innerHTML = '<p>You are not an admin in any servers.</p>';
+                        } else {
+                            guildsListDiv.innerHTML = guilds.map(g => {
+                                const iconUrl = g.icon
+                                    ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`
+                                    : 'https://cdn.discordapp.com/embed/avatars/0.png';
+                                // Make each guild card a button for accessibility and clickability
+                                return `
+                                    <button class="guild-card" data-guild-id="${g.id}" title="Go to dashboard for ${g.name}">
+                                        <img class="guild-icon" src="${iconUrl}" alt="Server Icon">
+                                        <div class="guild-name">${g.name}</div>
+                                    </button>
+                                `;
+                            }).join('');
+                            // Add click handler for dashboard/invite logic
+                            guildsListDiv.querySelectorAll('.guild-card').forEach(card => {
+                                card.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    const guildId = this.getAttribute('data-guild-id');
+                                    // Always compare as strings for safety
+                                    if (botGuilds.map(String).includes(String(guildId))) {
+                                        // Show empty dashboard page (for now, just clear the page and show a placeholder)
+                                        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;"><h1>Dashboard for Guild ID: ' + guildId + ' (Coming Soon)</h1></div>';
+                                    } else {
+                                        // Redirect to Discord bot invite link for that server
+                                        const clientId = '1337542083493232650'; // Your bot's client ID
+                                        const permissions = '8'; // Admin perms
+                                        const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&scope=bot+applications.commands&permissions=${permissions}&guild_id=${guildId}&disable_guild_select=true`;
+                                        window.location.href = inviteUrl;
+                                    }
+                                });
+                            });
+                        }
+                    }
                 }
-            }
-        }
+            });
     }
 }
