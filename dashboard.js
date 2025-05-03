@@ -29,12 +29,17 @@ function hideLoadingSpinner() {
 function createChannelDropdown(selected, allChannels, multi = false, onChange = null) {
     const selectedArr = Array.isArray(selected) ? selected : [selected];
     const dropdownId = 'dropdown-' + Math.random().toString(36).slice(2);
-    let html = `<div class="channel-dropdown-box" tabindex="0" id="${dropdownId}">
-        <div class="channel-dropdown-selected">
+    // Calculate width for multi-select: wider if more channels selected
+    let minWidth = 140, maxWidth = 320;
+    if (multi && selectedArr.length > 1) {
+        minWidth = Math.min(220 + selectedArr.length * 40, maxWidth);
+    }
+    let html = `<div class="channel-dropdown-box" tabindex="0" id="${dropdownId}" style="min-width:${minWidth}px;max-width:${maxWidth}px;">
+        <div class="channel-dropdown-selected" style="max-width:${maxWidth - 20}px;">
             ${selectedArr.map(cid => `<span class="channel-pill">${allChannels[cid] || '(unknown)'}</span>`).join(multi ? ', ' : '')}
             <span class="channel-dropdown-arrow">&#9662;</span>
         </div>
-        <div class="channel-dropdown-list" style="display:none;">
+        <div class="channel-dropdown-list" style="display:none;min-width:${minWidth}px;max-width:${maxWidth}px;">
             ${Object.entries(allChannels).map(([cid, name]) => `
                 <div class="channel-dropdown-item${selectedArr.includes(cid) ? ' selected' : ''}" data-cid="${cid}">${name}</div>
             `).join('')}
