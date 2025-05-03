@@ -11,10 +11,10 @@
 <body style="background: var(--bg); color: var(--text); font-family: 'Montserrat', sans-serif;">
     <nav class="dashboard-nav glass">
         <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar">☰</button>
-        <div class="logo" style="font-size:2rem;font-weight:700;letter-spacing:2px;color:var(--primary);display:flex;align-items:center;gap:0.6rem;">
-            <img src="Epic Bot.png" alt="Epic Bot Logo" style="height:2.2rem;border-radius:50%;background:#fff;"> Epic Bot
+        <div class="logo dashboard-logo">
+            <img src="Epic Bot.png" alt="Epic Bot Logo" class="dashboard-logo-img"> Epic Bot
         </div>
-        <ul>
+        <ul id="dashboard-menu">
             <li><a href="#overview" class="active nav-link" data-page="overview"><span class="icon">🏠</span>Overview</a></li>
             <li><a href="#moderation" class="nav-link" data-page="moderation"><span class="icon">🛡️</span>Moderation</a></li>
             <li><a href="#tickets" class="nav-link" data-page="tickets"><span class="icon">🎫</span>Tickets</a></li>
@@ -23,7 +23,7 @@
         </ul>
         <div class="nav-footer">&copy; 2025 Epic Bot</div>
     </nav>
-    <main class="dashboard-main">
+    <main class="dashboard-main centered-content">
         <div class="dashboard-title gradient-text" style="margin-bottom:1.2rem;">Epic Bot Dashboard</div>
         <div class="dashboard-guild" id="guild-name"></div>
         <div id="dashboard-root">
