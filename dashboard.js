@@ -121,8 +121,8 @@ function renderLevelingSection(data) {
             out += `</table>`;
             // Pagination buttons
             out += `<div style="display:flex;justify-content:center;gap:1.5rem;margin-top:1.2rem;">
-                <button id="leaderboard-prev" class="btn glass-btn" ${page === 0 ? 'disabled' : ''}>&#8592;</button>
-                <button id="leaderboard-next" class="btn glass-btn" ${(end >= data.leaderboard.length) ? 'disabled' : ''}>&#8594;</button>
+                <button type="button" id="leaderboard-prev" class="btn glass-btn" ${page === 0 ? 'disabled' : ''}>&#8592;</button>
+                <button type="button" id="leaderboard-next" class="btn glass-btn" ${(end >= data.leaderboard.length) ? 'disabled' : ''}>&#8594;</button>
             </div>`;
             out += `</div>`;
         } else {
@@ -132,20 +132,23 @@ function renderLevelingSection(data) {
     }
     function updateLeaderboard(page) {
         levelDiv.innerHTML = html + renderLeaderboardPage(page);
-        const prevBtn = document.getElementById('leaderboard-prev');
-        const nextBtn = document.getElementById('leaderboard-next');
-        if (prevBtn) prevBtn.onclick = () => {
-            if (currentPage > 0) {
-                currentPage--;
-                updateLeaderboard(currentPage);
-            }
-        };
-        if (nextBtn) nextBtn.onclick = () => {
-            if ((currentPage + 1) * perPage < data.leaderboard.length) {
-                currentPage++;
-                updateLeaderboard(currentPage);
-            }
-        };
+        // Use setTimeout to ensure DOM is updated before adding event listeners
+        setTimeout(() => {
+            const prevBtn = document.getElementById('leaderboard-prev');
+            const nextBtn = document.getElementById('leaderboard-next');
+            if (prevBtn) prevBtn.onclick = () => {
+                if (currentPage > 0) {
+                    currentPage--;
+                    updateLeaderboard(currentPage);
+                }
+            };
+            if (nextBtn) nextBtn.onclick = () => {
+                if ((currentPage + 1) * perPage < data.leaderboard.length) {
+                    currentPage++;
+                    updateLeaderboard(currentPage);
+                }
+            };
+        }, 0);
     }
     if (data.leveling_settings) {
         html += `<div class="dashboard-card" style="margin-bottom:2rem; padding-bottom:1.2rem;">
