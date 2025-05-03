@@ -436,23 +436,79 @@ function renderModerationSection(data) {
     modDiv.innerHTML = html;
 
     // --- Moderation Role Editing Logic ---
-    function getSelectedRoleId(dropdownBox) {
-        const selected = dropdownBox.querySelector('.role-dropdown-item.selected');
-        return selected ? selected.getAttribute('data-rid') : '';
-    }
-    function getSelectedCmds(cmdDropdownBox) {
-        return Array.from(cmdDropdownBox.querySelectorAll('.command-dropdown-item.selected')).map(i => i.getAttribute('data-cmd'));
-    }
+
+    // Delegated event handling for all dropdowns in the moderation table
+    const table = document.getElementById('mod-roles-table');
+    table.onclick = function(e) {
+        // Role dropdown item
+        if (e.target.classList.contains('role-dropdown-item')) {
+            const item = e.target;
+            if (item.classList.contains('selected')) return;
+            const tr = item.closest('tr');
+            if (!tr) return;
+            const newRoleId = item.getAttribute('data-rid');
+            if (!newRoleId) return;
+            if (table.querySelector(`tr[data-role-id="${newRoleId}"]`)) return;
+            tr.setAttribute('data-role-id', newRoleId);
+            tr.id = `mod-role-row-${newRoleId}`;
+            const btn = tr.querySelector('.mod-role-remove-btn');
+            if (btn) btn.setAttribute('data-role-id', newRoleId);
+            const dropdown = tr.querySelector('.role-dropdown-box');
+            if (dropdown) dropdown.id = `role-dropdown-${newRoleId}`;
+            // Re-render the dropdown cell to update exclude list
+            const cell = dropdown.parentElement;
+            if (cell) {
+                cell.innerHTML = createRoleDropdown(newRoleId, roleNames, Object.keys(collectModerationRoles()), `role-dropdown-${newRoleId}`);
+            }
+            showApplyBar();
+        }
+        // Command dropdown item
+        if (e.target.classList.contains('command-dropdown-item')) {
+            e.target.classList.toggle('selected');
+            // Update the selected commands visually
+            const box = e.target.closest('.command-dropdown-box');
+            if (box) {
+                const selectedCmds = Array.from(box.querySelectorAll('.command-dropdown-item.selected')).map(i => i.getAttribute('data-cmd'));
+                const selectedDiv = box.querySelector('.command-dropdown-selected');
+                if (selectedDiv) {
+                    selectedDiv.innerHTML = selectedCmds.map(cmd => `<span class="command-pill">${cmd}</span>`).join('') + '<span class="command-dropdown-arrow">&#9662;</span>';
+                }
+            }
+            showApplyBar();
+        }
+        // Remove role button
+        if (e.target.classList.contains('mod-role-remove-btn')) {
+            const btn = e.target;
+            const roleId = btn.getAttribute('data-role-id');
+            const row = btn.closest('tr');
+            if (row) row.remove();
+            // Add back to add dropdown
+            const addSel = document.getElementById('mod-role-add-select');
+            if (addSel && !addSel.querySelector(`.role-dropdown-item[data-rid="${roleId}"]`)) {
+                const listDiv = addSel.querySelector('.role-dropdown-list');
+                if (listDiv) {
+                    const opt = document.createElement('div');
+                    opt.className = 'role-dropdown-item';
+                    opt.setAttribute('data-rid', roleId);
+                    opt.textContent = roleNames[roleId] || roleId;
+                    listDiv.appendChild(opt);
+                }
+            }
+            showApplyBar();
+        }
+    };
 
     // Add new role
     document.getElementById('mod-role-add-btn').onclick = function() {
         const addRoleDropdownBox = document.getElementById('mod-role-add-select');
         const addCmdDropdownBox = document.getElementById('mod-role-add-cmds');
-        const selectedRoleId = getSelectedRoleId(addRoleDropdownBox);
-        const cmds = getSelectedCmds(addCmdDropdownBox);
+        // Get selected role
+        const selected = addRoleDropdownBox.querySelector('.role-dropdown-item.selected');
+        const selectedRoleId = selected ? selected.getAttribute('data-rid') : '';
+        // Get selected commands
+        const cmds = Array.from(addCmdDropdownBox.querySelectorAll('.command-dropdown-item.selected')).map(i => i.getAttribute('data-cmd'));
         if (!selectedRoleId || cmds.length === 0) return;
-        if (document.querySelector(`#mod-roles-table tr[data-role-id="${selectedRoleId}"]`)) return;
-        const table = document.getElementById('mod-roles-table');
+        if (table.querySelector(`tr[data-role-id="${selectedRoleId}"]`)) return;
         const tr = document.createElement('tr');
         tr.setAttribute('data-role-id', selectedRoleId);
         tr.id = `mod-role-row-${selectedRoleId}`;
@@ -482,75 +538,8 @@ function renderModerationSection(data) {
             if (sel) sel.innerHTML = '<span class="command-dropdown-arrow">&#9662;</span>';
         }
         showApplyBar();
-        setupModRoleEvents();
     };
 
-    function setupModRoleEvents() {
-        // Remove role
-        document.querySelectorAll('.mod-role-remove-btn').forEach(btn => {
-            btn.onclick = function() {
-                const roleId = btn.getAttribute('data-role-id');
-                const row = btn.closest('tr');
-                if (row) row.remove();
-                const addSel = document.getElementById('mod-role-add-select');
-                if (addSel && !addSel.querySelector(`.role-dropdown-item[data-rid="${roleId}"]`)) {
-                    const listDiv = addSel.querySelector('.role-dropdown-list');
-                    if (listDiv) {
-                        const opt = document.createElement('div');
-                        opt.className = 'role-dropdown-item';
-                        opt.setAttribute('data-rid', roleId);
-                        opt.textContent = roleNames[roleId] || roleId;
-                        listDiv.appendChild(opt);
-                        opt.onclick = () => { 
-                            // Select this role in the add dropdown
-                            listDiv.querySelectorAll('.role-dropdown-item').forEach(i => i.classList.remove('selected'));
-                            opt.classList.add('selected');
-                            const sel = addSel.querySelector('.role-dropdown-selected');
-                            if (sel) sel.innerHTML = `<span class="role-pill">${roleNames[roleId] || '(unknown)'}</span><span class="role-dropdown-arrow">&#9662;</span>`;
-                            showApplyBar();
-                        };
-                    }
-                }
-                showApplyBar();
-            };
-        });
-        // Role dropdown change in table (delegation)
-        document.querySelectorAll('#mod-roles-table .role-dropdown-list').forEach(listDiv => {
-            listDiv.querySelectorAll('.role-dropdown-item').forEach(item => {
-                item.onclick = function(e) {
-                    e.stopPropagation();
-                    if (item.classList.contains('selected')) return;
-                    const tr = item.closest('tr');
-                    if (!tr) return;
-                    const newRoleId = item.getAttribute('data-rid');
-                    if (!newRoleId) return;
-                    if (document.querySelector(`#mod-roles-table tr[data-role-id="${newRoleId}"]`)) return;
-                    tr.setAttribute('data-role-id', newRoleId);
-                    tr.id = `mod-role-row-${newRoleId}`;
-                    const btn = tr.querySelector('.mod-role-remove-btn');
-                    if (btn) btn.setAttribute('data-role-id', newRoleId);
-                    const dropdown = tr.querySelector('.role-dropdown-box');
-                    if (dropdown) dropdown.id = `role-dropdown-${newRoleId}`;
-                    showApplyBar();
-                    // Re-render the dropdown to update exclude list
-                    const cell = dropdown.parentElement;
-                    if (cell) {
-                        cell.innerHTML = createRoleDropdown(newRoleId, roleNames, Object.keys(collectModerationRoles()), `role-dropdown-${newRoleId}`);
-                        setupModRoleEvents();
-                    }
-                };
-            });
-        });
-        // Command dropdown change triggers apply bar
-        document.querySelectorAll('.command-dropdown-box').forEach(box => {
-            box.querySelectorAll('.command-dropdown-item').forEach(item => {
-                item.onclick = () => {
-                    showApplyBar();
-                };
-            });
-        });
-    }
-    setupModRoleEvents();
     setTimeout(setupDropdownChangeDetection, 0);
 }
 
