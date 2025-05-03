@@ -10,6 +10,11 @@ let roleNames = {};
 let userNames = {};
 let channelNames = {};
 
+// --- Moderation Commands List (should match backend) ---
+const ALL_MOD_COMMANDS = [
+    "ban", "kick", "mute", "unmute", "warn", "clearwarns", "purge", "timeout", "untimeout"
+];
+
 // --- Loading spinner ---
 function showLoadingSpinner() {
     let spinner = document.getElementById('dashboard-loading-spinner');
@@ -182,6 +187,16 @@ function resetDropdownsToOriginal() {
     hideApplyBar();
 }
 
+function collectModerationRoles() {
+    const roles = {};
+    document.querySelectorAll('#mod-roles-table tr[data-role-id]').forEach(tr => {
+        const roleId = tr.getAttribute('data-role-id');
+        const cmds = Array.from(tr.querySelector('.mod-cmd-select').selectedOptions).map(o => o.value);
+        if (roleId && cmds.length > 0) roles[roleId] = cmds;
+    });
+    return roles;
+}
+
 function applyDropdownChanges() {
     showApplyBarLoading();
     // Collect the current dropdown selections by dropdown id
@@ -239,6 +254,11 @@ function applyDropdownChanges() {
     if (Object.keys(ticket_settings).length) updates.ticket_settings = ticket_settings;
     if (Object.keys(log_settings).length) updates.log_settings = log_settings;
     if (Object.keys(leveling_settings).length) updates.leveling_settings = leveling_settings;
+    // Moderation roles
+    if (document.getElementById('mod-roles-table')) {
+        const modRoles = collectModerationRoles();
+        if (Object.keys(modRoles).length) updates.moderation_roles = modRoles;
+    }
     // Send PATCH request
     fetch('https://epic-bot-backend-production.up.railway.app/api/update-guild-channels', {
         method: 'PATCH',
@@ -264,14 +284,47 @@ function renderModerationSection(data) {
     let html = `<div class="dashboard-card">
         <span class="dashboard-label">Moderation Setup:</span> <span class="badge ${data.moderation_setup ? 'enabled' : 'disabled'}">${data.moderation_setup ? 'Enabled' : 'Disabled'}</span>
     </div>`;
-    if (data.moderation_roles && Object.keys(data.moderation_roles).length > 0) {
-        html += `<div class="dashboard-card"><span class="dashboard-label">Role Permissions:</span><table><tr><th>Role</th><th>Allowed Commands</th></tr>`;
-        for (const [roleId, cmds] of Object.entries(data.moderation_roles)) {
-            const roleName = roleNames[roleId] || roleId;
-            html += `<tr><td>${escapeHTML(roleName)}</td><td>${cmds.map(c => `<span class='badge enabled'>${escapeHTML(c)}</span>`).join(' ')}</td></tr>`;
-        }
-        html += `</table></div>`;
+    // Editable moderation roles
+    html += `<div class="dashboard-card" id="mod-roles-edit"><span class="dashboard-label">Role Permissions:</span>
+        <table id="mod-roles-table"><tr><th>Role</th><th>Allowed Commands</th><th>Actions</th></tr>`;
+    // Existing roles
+    for (const [roleId, cmds] of Object.entries(data.moderation_roles || {})) {
+        const roleName = roleNames[roleId] || roleId;
+        html += `<tr data-role-id="${roleId}">
+            <td>${escapeHTML(roleName)}</td>
+            <td>
+                <select multiple class="mod-cmd-select" data-role-id="${roleId}">
+                    ${ALL_MOD_COMMANDS.map(cmd =>
+                        `<option value="${cmd}"${cmds.includes(cmd) ? " selected" : ""}>${escapeHTML(cmd)}</option>`
+                    ).join('')}
+                </select>
+            </td>
+            <td>
+                <button class="mod-role-remove-btn" data-role-id="${roleId}" title="Remove role">&#10060;</button>
+            </td>
+        </tr>`;
     }
+    // Add new role row
+    html += `<tr id="mod-role-add-row">
+        <td>
+            <select id="mod-role-add-select">
+                <option value="">Select role...</option>
+                ${Object.entries(roleNames).map(([rid, rname]) =>
+                    data.moderation_roles && data.moderation_roles[rid] ? "" : `<option value="${rid}">${escapeHTML(rname)}</option>`
+                ).join('')}
+            </select>
+        </td>
+        <td>
+            <select multiple id="mod-role-add-cmds">
+                ${ALL_MOD_COMMANDS.map(cmd => `<option value="${cmd}">${escapeHTML(cmd)}</option>`).join('')}
+            </select>
+        </td>
+        <td>
+            <button id="mod-role-add-btn" title="Add role">&#43;</button>
+        </td>
+    </tr>`;
+    html += `</table></div>`;
+    // Warnings
     if (data.warnings && data.warnings.length > 0) {
         html += `<button class="collapsible">Show Warnings (${data.warnings.length})</button><div class="collapsible-content"><table><tr><th>User</th><th>Moderator</th><th>Reason</th><th>Date</th><th>ID</th></tr>`;
         for (const w of data.warnings) {
@@ -282,6 +335,64 @@ function renderModerationSection(data) {
         html += `</table></div>`;
     }
     modDiv.innerHTML = html;
+
+    // --- Moderation Role Editing Logic ---
+    // Add new role
+    document.getElementById('mod-role-add-btn').onclick = function() {
+        const roleId = document.getElementById('mod-role-add-select').value;
+        const cmds = Array.from(document.getElementById('mod-role-add-cmds').selectedOptions).map(o => o.value);
+        if (!roleId || cmds.length === 0) return;
+        // Add row to table
+        const table = document.getElementById('mod-roles-table');
+        const tr = document.createElement('tr');
+        tr.setAttribute('data-role-id', roleId);
+        tr.innerHTML = `<td>${escapeHTML(roleNames[roleId] || roleId)}</td>
+            <td>
+                <select multiple class="mod-cmd-select" data-role-id="${roleId}">
+                    ${ALL_MOD_COMMANDS.map(cmd =>
+                        `<option value="${cmd}"${cmds.includes(cmd) ? " selected" : ""}>${escapeHTML(cmd)}</option>`
+                    ).join('')}
+                </select>
+            </td>
+            <td>
+                <button class="mod-role-remove-btn" data-role-id="${roleId}" title="Remove role">&#10060;</button>
+            </td>`;
+        table.insertBefore(tr, document.getElementById('mod-role-add-row'));
+        // Remove from add select
+        document.getElementById('mod-role-add-select').querySelector(`option[value="${roleId}"]`).remove();
+        // Reset
+        document.getElementById('mod-role-add-select').value = "";
+        document.getElementById('mod-role-add-cmds').selectedIndex = -1;
+        showApplyBar();
+        setupModRoleEvents();
+    };
+
+    function setupModRoleEvents() {
+        // Remove role
+        document.querySelectorAll('.mod-role-remove-btn').forEach(btn => {
+            btn.onclick = function() {
+                const roleId = btn.getAttribute('data-role-id');
+                // Remove row
+                const row = btn.closest('tr');
+                if (row) row.remove();
+                // Add back to add select
+                const addSel = document.getElementById('mod-role-add-select');
+                if (addSel && !addSel.querySelector(`option[value="${roleId}"]`)) {
+                    const opt = document.createElement('option');
+                    opt.value = roleId;
+                    opt.textContent = roleNames[roleId] || roleId;
+                    addSel.appendChild(opt);
+                }
+                showApplyBar();
+            };
+        });
+        // Command select change triggers apply bar
+        document.querySelectorAll('.mod-cmd-select').forEach(sel => {
+            sel.onchange = showApplyBar;
+        });
+    }
+    setupModRoleEvents();
+    setTimeout(setupDropdownChangeDetection, 0);
 }
 
 function renderTicketSection(data) {
