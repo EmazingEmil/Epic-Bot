@@ -526,7 +526,7 @@ td {
 }
 
 /* Moderation Command Dropdown Styles */
-.command-dropdown-box {
+.command-dropdown-box, .role-dropdown-box {
     display: inline-block;
     position: relative;
     min-width: 140px;
@@ -540,7 +540,7 @@ td {
     box-shadow: 0 2px 10px #7f5af033;
 }
 .command-dropdown-selected,
-.command-dropdown-wrap {
+.command-dropdown-wrap, .role-dropdown-selected, .role-dropdown-wrap {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -549,13 +549,13 @@ td {
     width: auto;
     overflow-x: auto;
 }
-.command-dropdown-arrow {
+.command-dropdown-arrow, .role-dropdown-arrow {
     margin-left: 0.5rem;
     font-size: 1.1em;
     color: var(--primary);
     transition: transform 0.2s;
 }
-.command-dropdown-list {
+.command-dropdown-list, .role-dropdown-list {
     display: none;
     position: absolute;
     left: 0;
@@ -571,10 +571,10 @@ td {
     overflow-y: auto;
     margin-top: 2px;
 }
-.command-dropdown-box:focus .command-dropdown-list {
+.command-dropdown-box:focus .command-dropdown-list, .role-dropdown-box:focus, .role-dropdown-list {
     display: block;
 }
-.command-dropdown-item {
+.command-dropdown-item, .role-dropdown-item {
     padding: 0.5rem 1rem;
     color: var(--text-secondary);
     cursor: pointer;
@@ -586,7 +586,7 @@ td {
     text-overflow: unset;
     white-space: normal;
 }
-.command-dropdown-item.selected {
+.command-dropdown-item.selected, .role-dropdown-item.selected {
     background: #2a2a38;
     color: #888;
     cursor: not-allowed;
