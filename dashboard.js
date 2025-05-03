@@ -184,15 +184,78 @@ function resetDropdownsToOriginal() {
 
 function applyDropdownChanges() {
     showApplyBarLoading();
-    // Example: send PATCH to backend (adjust endpoint/data as needed)
-    // Here, you need to map dropdown state to channel IDs, not just names
-    // For demo, just simulate success
-    setTimeout(() => {
-        // Simulate success
-        originalDropdownState = JSON.parse(JSON.stringify(pendingDropdownState));
-        showApplyBarSuccess('Changes saved successfully!');
-    }, 1500);
-    // On error, call showApplyBarError('Failed to save: ...')
+    // Collect the current dropdown selections by dropdown id
+    const dropdowns = document.querySelectorAll('.channel-dropdown-box');
+    let updates = {};
+    let ticket_settings = {};
+    let log_settings = {};
+    let leveling_settings = {};
+    // Map dropdowns to their settings by label
+    dropdowns.forEach(drop => {
+        const label = drop.parentElement && drop.parentElement.querySelector('.dashboard-label')
+            ? drop.parentElement.querySelector('.dashboard-label').textContent.trim().toLowerCase()
+            : '';
+        const selected = Array.from(drop.querySelectorAll('.channel-pill')).map(e => e.textContent);
+        // Find channel ID by name
+        const selectedIds = selected.map(name => {
+            for (const [cid, cname] of Object.entries(channelNames)) {
+                if (cname === name) return cid;
+            }
+            return null;
+        }).filter(Boolean);
+        if (label.includes('panel channel')) {
+            ticket_settings.channel_id = selectedIds[0] || null;
+        } else if (label.includes('log channel') && drop.parentElement.parentElement.id === 'ticket-system') {
+            ticket_settings.log_channel_id = selectedIds[0] || null;
+        } else if (label.includes('log channel')) {
+            log_settings.log_channel_id = selectedIds[0] || null;
+        } else if (label.includes('selected channels')) {
+            log_settings.selected_channels = selectedIds;
+        } else if (label.includes('channel')) {
+            leveling_settings.channel_id = selectedIds[0] || null;
+        }
+    });
+    // Get extra info for ticket, log, leveling if available
+    const ticketSection = document.getElementById('ticket-system');
+    if (ticketSection) {
+        const rules = ticketSection.querySelector('.dashboard-value');
+        if (rules) ticket_settings.rules_text = rules.textContent;
+        const msg = ticketSection.querySelectorAll('.dashboard-value');
+        if (msg && msg.length > 1) ticket_settings.ticket_msg = msg[1].textContent;
+    }
+    const loggingSection = document.getElementById('logging-section');
+    if (loggingSection) {
+        const mode = loggingSection.querySelector('.dashboard-value');
+        if (mode) log_settings.mode = mode.textContent;
+        const events = Array.from(loggingSection.querySelectorAll('.badge.enabled')).map(e => e.textContent);
+        if (events.length) log_settings.events = events;
+    }
+    const levelingSection = document.getElementById('leveling-section');
+    if (levelingSection) {
+        const msg = levelingSection.querySelector('.dashboard-value');
+        if (msg) leveling_settings.levelup_message = msg.textContent;
+    }
+    if (Object.keys(ticket_settings).length) updates.ticket_settings = ticket_settings;
+    if (Object.keys(log_settings).length) updates.log_settings = log_settings;
+    if (Object.keys(leveling_settings).length) updates.leveling_settings = leveling_settings;
+    // Send PATCH request
+    fetch('https://epic-bot-backend-production.up.railway.app/api/update-guild-channels', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guild_id: guildId, updates })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            originalDropdownState = JSON.parse(JSON.stringify(pendingDropdownState));
+            showApplyBarSuccess('Changes saved successfully!');
+        } else {
+            showApplyBarError('Failed to save: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(err => {
+        showApplyBarError('Failed to save: ' + err);
+    });
 }
 
 function renderModerationSection(data) {
