@@ -83,6 +83,43 @@ function createChannelDropdown(selected, allChannels, multi = false, onChange = 
     return html;
 }
 
+// Helper for styled role dropdown
+function createRoleDropdown(selected, allRoles, exclude = [], id = '', onChange = null) {
+    const dropdownId = id || 'role-dropdown-' + Math.random().toString(36).slice(2);
+    let html = `<div class="role-dropdown-box" tabindex="0" id="${dropdownId}">
+        <div class="role-dropdown-selected role-dropdown-wrap">
+            <span class="role-pill">${allRoles[selected] || '(unknown)'}</span>
+            <span class="role-dropdown-arrow">&#9662;</span>
+        </div>
+        <div class="role-dropdown-list" style="display:none;">
+            ${Object.entries(allRoles).map(([rid, name]) =>
+                exclude.includes(rid) ? '' : `<div class="role-dropdown-item${selected === rid ? ' selected' : ''}" data-rid="${rid}">${name}</div>`
+            ).join('')}
+        </div>
+    </div>`;
+    setTimeout(() => {
+        const box = document.getElementById(dropdownId);
+        if (!box) return;
+        const selectedDiv = box.querySelector('.role-dropdown-selected');
+        const listDiv = box.querySelector('.role-dropdown-list');
+        selectedDiv.onclick = () => {
+            listDiv.style.display = listDiv.style.display === 'block' ? 'none' : 'block';
+        };
+        box.onblur = () => { listDiv.style.display = 'none'; };
+        listDiv.querySelectorAll('.role-dropdown-item').forEach(item => {
+            item.onclick = (e) => {
+                e.stopPropagation();
+                listDiv.querySelectorAll('.role-dropdown-item').forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+                if (onChange) onChange(item.getAttribute('data-rid'));
+                selectedDiv.innerHTML = `<span class="role-pill">${allRoles[item.getAttribute('data-rid')] || '(unknown)'}</span><span class="role-dropdown-arrow">&#9662;</span>`;
+                listDiv.style.display = 'none';
+            };
+        });
+    }, 0);
+    return html;
+}
+
 // --- Apply Changes Bar Logic ---
 let originalDropdownState = {};
 let pendingDropdownState = {};
@@ -288,39 +325,37 @@ function renderModerationSection(data) {
     html += `<div class="dashboard-card" id="mod-roles-edit"><span class="dashboard-label">Role Permissions:</span>
         <table id="mod-roles-table"><tr><th>Role</th><th>Allowed Commands</th><th>Actions</th></tr>`;
     // Existing roles
+    const usedRoleIds = Object.keys(data.moderation_roles || {});
     for (const [roleId, cmds] of Object.entries(data.moderation_roles || {})) {
-        const roleName = roleNames[roleId] || roleId;
-        html += `<tr data-role-id="${roleId}">
-            <td>${escapeHTML(roleName)}</td>
+        const rowId = `mod-role-row-${roleId}`;
+        html += `<tr data-role-id="${roleId}" id="${rowId}">
             <td>
-                <select multiple class="mod-cmd-select" data-role-id="${roleId}">
+                ${createRoleDropdown(roleId, roleNames, usedRoleIds.filter(rid => rid !== roleId), `role-dropdown-${roleId}`)}
+            </td>
+            <td>
+                <select multiple class="mod-cmd-select styled-select" data-role-id="${roleId}">
                     ${ALL_MOD_COMMANDS.map(cmd =>
                         `<option value="${cmd}"${cmds.includes(cmd) ? " selected" : ""}>${escapeHTML(cmd)}</option>`
                     ).join('')}
                 </select>
             </td>
             <td>
-                <button class="mod-role-remove-btn" data-role-id="${roleId}" title="Remove role">&#10060;</button>
+                <button class="mod-role-remove-btn styled-btn" data-role-id="${roleId}" title="Remove role">&#10060;</button>
             </td>
         </tr>`;
     }
     // Add new role row
     html += `<tr id="mod-role-add-row">
         <td>
-            <select id="mod-role-add-select">
-                <option value="">Select role...</option>
-                ${Object.entries(roleNames).map(([rid, rname]) =>
-                    data.moderation_roles && data.moderation_roles[rid] ? "" : `<option value="${rid}">${escapeHTML(rname)}</option>`
-                ).join('')}
-            </select>
+            ${createRoleDropdown('', roleNames, usedRoleIds, 'mod-role-add-select')}
         </td>
         <td>
-            <select multiple id="mod-role-add-cmds">
+            <select multiple id="mod-role-add-cmds" class="styled-select">
                 ${ALL_MOD_COMMANDS.map(cmd => `<option value="${cmd}">${escapeHTML(cmd)}</option>`).join('')}
             </select>
         </td>
         <td>
-            <button id="mod-role-add-btn" title="Add role">&#43;</button>
+            <button id="mod-role-add-btn" class="styled-btn" title="Add role">&#43;</button>
         </td>
     </tr>`;
     html += `</table></div>`;
@@ -338,30 +373,55 @@ function renderModerationSection(data) {
 
     // --- Moderation Role Editing Logic ---
     // Add new role
+    const addRoleDropdownBox = document.getElementById('mod-role-add-select');
+    let addRoleId = '';
+    if (addRoleDropdownBox) {
+        addRoleDropdownBox.addEventListener('click', () => {
+            // handled by dropdown
+        });
+        // Listen for selection
+        setTimeout(() => {
+            addRoleDropdownBox.querySelectorAll('.role-dropdown-item').forEach(item => {
+                item.onclick = () => {
+                    addRoleId = item.getAttribute('data-rid');
+                };
+            });
+        }, 0);
+    }
     document.getElementById('mod-role-add-btn').onclick = function() {
-        const roleId = document.getElementById('mod-role-add-select').value;
+        // Get selected role
+        let selectedRoleId = addRoleId;
+        if (!selectedRoleId) {
+            // fallback: get from DOM
+            const selected = addRoleDropdownBox.querySelector('.role-dropdown-item.selected');
+            if (selected) selectedRoleId = selected.getAttribute('data-rid');
+        }
         const cmds = Array.from(document.getElementById('mod-role-add-cmds').selectedOptions).map(o => o.value);
-        if (!roleId || cmds.length === 0) return;
+        if (!selectedRoleId || cmds.length === 0) return;
         // Add row to table
         const table = document.getElementById('mod-roles-table');
         const tr = document.createElement('tr');
-        tr.setAttribute('data-role-id', roleId);
-        tr.innerHTML = `<td>${escapeHTML(roleNames[roleId] || roleId)}</td>
+        tr.setAttribute('data-role-id', selectedRoleId);
+        tr.id = `mod-role-row-${selectedRoleId}`;
+        tr.innerHTML = `<td>
+                ${createRoleDropdown(selectedRoleId, roleNames, Object.keys(collectModerationRoles()), `role-dropdown-${selectedRoleId}`)}
+            </td>
             <td>
-                <select multiple class="mod-cmd-select" data-role-id="${roleId}">
+                <select multiple class="mod-cmd-select styled-select" data-role-id="${selectedRoleId}">
                     ${ALL_MOD_COMMANDS.map(cmd =>
                         `<option value="${cmd}"${cmds.includes(cmd) ? " selected" : ""}>${escapeHTML(cmd)}</option>`
                     ).join('')}
                 </select>
             </td>
             <td>
-                <button class="mod-role-remove-btn" data-role-id="${roleId}" title="Remove role">&#10060;</button>
+                <button class="mod-role-remove-btn styled-btn" data-role-id="${selectedRoleId}" title="Remove role">&#10060;</button>
             </td>`;
         table.insertBefore(tr, document.getElementById('mod-role-add-row'));
-        // Remove from add select
-        document.getElementById('mod-role-add-select').querySelector(`option[value="${roleId}"]`).remove();
-        // Reset
-        document.getElementById('mod-role-add-select').value = "";
+        // Remove from add dropdown
+        addRoleDropdownBox.querySelectorAll('.role-dropdown-item').forEach(opt => {
+            if (opt.getAttribute('data-rid') === selectedRoleId) opt.remove();
+        });
+        addRoleId = '';
         document.getElementById('mod-role-add-cmds').selectedIndex = -1;
         showApplyBar();
         setupModRoleEvents();
@@ -375,13 +435,19 @@ function renderModerationSection(data) {
                 // Remove row
                 const row = btn.closest('tr');
                 if (row) row.remove();
-                // Add back to add select
+                // Add back to add dropdown
                 const addSel = document.getElementById('mod-role-add-select');
-                if (addSel && !addSel.querySelector(`option[value="${roleId}"]`)) {
-                    const opt = document.createElement('option');
-                    opt.value = roleId;
-                    opt.textContent = roleNames[roleId] || roleId;
-                    addSel.appendChild(opt);
+                if (addSel && !addSel.querySelector(`.role-dropdown-item[data-rid="${roleId}"]`)) {
+                    // Insert in dropdown list
+                    const listDiv = addSel.querySelector('.role-dropdown-list');
+                    if (listDiv) {
+                        const opt = document.createElement('div');
+                        opt.className = 'role-dropdown-item';
+                        opt.setAttribute('data-rid', roleId);
+                        opt.textContent = roleNames[roleId] || roleId;
+                        listDiv.appendChild(opt);
+                        opt.onclick = () => { addRoleId = roleId; };
+                    }
                 }
                 showApplyBar();
             };
@@ -389,6 +455,28 @@ function renderModerationSection(data) {
         // Command select change triggers apply bar
         document.querySelectorAll('.mod-cmd-select').forEach(sel => {
             sel.onchange = showApplyBar;
+        });
+        // Role dropdown change for each row
+        document.querySelectorAll('.role-dropdown-box').forEach(box => {
+            const tr = box.closest('tr[data-role-id]');
+            if (!tr) return;
+            const oldRoleId = tr.getAttribute('data-role-id');
+            box.querySelectorAll('.role-dropdown-item').forEach(item => {
+                item.onclick = () => {
+                    const newRoleId = item.getAttribute('data-rid');
+                    if (!newRoleId || newRoleId === oldRoleId) return;
+                    // Prevent duplicate roles
+                    if (document.querySelector(`#mod-roles-table tr[data-role-id="${newRoleId}"]`)) return;
+                    // Update row's data-role-id
+                    tr.setAttribute('data-role-id', newRoleId);
+                    // Update select's data-role-id
+                    const cmdSel = tr.querySelector('.mod-cmd-select');
+                    if (cmdSel) cmdSel.setAttribute('data-role-id', newRoleId);
+                    // Remove old row id, set new
+                    tr.id = `mod-role-row-${newRoleId}`;
+                    showApplyBar();
+                };
+            });
         });
     }
     setupModRoleEvents();
