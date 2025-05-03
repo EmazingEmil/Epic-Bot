@@ -32,20 +32,13 @@ function createChannelDropdown(selected, allChannels, multi = false, onChange = 
     // Set a max width for the dropdown; allow wrapping if too many channels
     const maxWidth = 520;
     const minWidth = 140;
-    // Calculate width based on selected channel names, but cap at maxWidth
-    let totalLen = 0;
-    if (multi && selectedArr.length > 0) {
-        totalLen = selectedArr.reduce((acc, cid) => acc + ((allChannels[cid] || '').length), 0);
-    } else if (!multi && selectedArr.length === 1) {
-        totalLen = (allChannels[selectedArr[0]] || '').length;
-    }
-    let width = Math.min(Math.max(minWidth, 32 + selectedArr.length * 18 + totalLen * 9 + (selectedArr.length-1)*10), maxWidth);
-    let html = `<div class="channel-dropdown-box" tabindex="0" id="${dropdownId}" style="width:${width}px;min-width:${minWidth}px;max-width:${maxWidth}px;">
-        <div class="channel-dropdown-selected channel-dropdown-wrap" style="width:${width-10}px;max-width:${maxWidth-10}px;">
-            ${selectedArr.map(cid => `<span class="channel-pill">${allChannels[cid] || '(unknown)'}</span>`).join(multi ? ', ' : '')}
+    // Instead of calculating width, let CSS handle wrapping and width
+    let html = `<div class="channel-dropdown-box" tabindex="0" id="${dropdownId}" style="min-width:${minWidth}px;max-width:${maxWidth}px;">
+        <div class="channel-dropdown-selected channel-dropdown-wrap" style="min-width:${minWidth-10}px;max-width:${maxWidth-10}px;">
+            ${selectedArr.map(cid => `<span class="channel-pill">${allChannels[cid] || '(unknown)'}</span>`).join(multi ? '' : '')}
             <span class="channel-dropdown-arrow">&#9662;</span>
         </div>
-        <div class="channel-dropdown-list" style="display:none;width:${width}px;min-width:${minWidth}px;max-width:${maxWidth}px;">
+        <div class="channel-dropdown-list" style="display:none;min-width:${minWidth}px;max-width:${maxWidth}px;">
             ${Object.entries(allChannels).map(([cid, name]) => `
                 <div class="channel-dropdown-item${selectedArr.includes(cid) ? ' selected' : ''}" data-cid="${cid}">${name}</div>
             `).join('')}
@@ -56,23 +49,6 @@ function createChannelDropdown(selected, allChannels, multi = false, onChange = 
         if (!box) return;
         const selectedDiv = box.querySelector('.channel-dropdown-selected');
         const listDiv = box.querySelector('.channel-dropdown-list');
-        function updateDropdownWidth(newSelectedArr) {
-            let totalLen = 0;
-            if (multi && newSelectedArr.length > 0) {
-                totalLen = newSelectedArr.reduce((acc, cid) => acc + ((allChannels[cid] || '').length), 0);
-            } else if (!multi && newSelectedArr.length === 1) {
-                totalLen = (allChannels[newSelectedArr[0]] || '').length;
-            }
-            let newWidth = Math.min(Math.max(minWidth, 32 + newSelectedArr.length * 18 + totalLen * 9 + (newSelectedArr.length-1)*10), maxWidth);
-            box.style.width = newWidth + 'px';
-            box.style.minWidth = minWidth + 'px';
-            box.style.maxWidth = maxWidth + 'px';
-            selectedDiv.style.width = (newWidth-10) + 'px';
-            selectedDiv.style.maxWidth = (maxWidth-10) + 'px';
-            listDiv.style.width = newWidth + 'px';
-            listDiv.style.minWidth = minWidth + 'px';
-            listDiv.style.maxWidth = maxWidth + 'px';
-        }
         selectedDiv.onclick = () => {
             listDiv.style.display = listDiv.style.display === 'block' ? 'none' : 'block';
         };
@@ -88,15 +64,13 @@ function createChannelDropdown(selected, allChannels, multi = false, onChange = 
                     }
                     const selectedCids = Array.from(listDiv.querySelectorAll('.channel-dropdown-item.selected')).map(i => i.getAttribute('data-cid'));
                     if (onChange) onChange(selectedCids);
-                    selectedDiv.innerHTML = selectedCids.map(cid => `<span class="channel-pill">${allChannels[cid] || '(unknown)'}</span>`).join(', ') + '<span class="channel-dropdown-arrow">&#9662;</span>';
-                    updateDropdownWidth(selectedCids);
+                    selectedDiv.innerHTML = selectedCids.map(cid => `<span class="channel-pill">${allChannels[cid] || '(unknown)'}</span>`).join('') + '<span class="channel-dropdown-arrow">&#9662;</span>';
                 } else {
                     listDiv.querySelectorAll('.channel-dropdown-item').forEach(i => i.classList.remove('selected'));
                     item.classList.add('selected');
                     if (onChange) onChange(item.getAttribute('data-cid'));
                     selectedDiv.innerHTML = `<span class="channel-pill">${allChannels[item.getAttribute('data-cid')] || '(unknown)'}</span><span class="channel-dropdown-arrow">&#9662;</span>`;
                     listDiv.style.display = 'none';
-                    updateDropdownWidth([item.getAttribute('data-cid')]);
                 }
             };
         });
