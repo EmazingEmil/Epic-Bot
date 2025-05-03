@@ -527,46 +527,52 @@ document.addEventListener('click', function(e) {
         if (!tr) return;
         const newRoleId = item.getAttribute('data-rid');
         if (!newRoleId) return;
-        // Prevent duplicate role in table
-        const table = document.getElementById('mod-roles-table');
-        if (table && table.querySelector(`tr[data-role-id="${newRoleId}"]`)) return;
-        // Update row's data-role-id and id if not add row
-        if (tr.id !== 'mod-role-add-row') {
-            tr.setAttribute('data-role-id', newRoleId);
-            tr.id = `mod-role-row-${newRoleId}`;
-            // Only update the dropdown cell, not the whole row
-            const dropdownCell = tr.querySelector('td');
-            if (dropdownCell) {
-                dropdownCell.innerHTML = createRoleDropdown(
-                    newRoleId,
-                    roleNames,
-                    Object.keys(collectModerationRoles()),
-                    `role-dropdown-${newRoleId}`
-                );
-            }
-            // Update the remove button's data-role-id
-            const btn = tr.querySelector('.mod-role-remove-btn');
-            if (btn) btn.setAttribute('data-role-id', newRoleId);
-            // Update the dropdown box id
-            const dropdown = tr.querySelector('.role-dropdown-box');
-            if (dropdown) dropdown.id = `role-dropdown-${newRoleId}`;
-            showApplyBar();
-        } else {
-            // For add row: visually select the item
-            const listDiv = box.querySelector('.role-dropdown-list');
-            if (listDiv) {
-                listDiv.querySelectorAll('.role-dropdown-item').forEach(i => i.classList.remove('selected'));
-                item.classList.add('selected');
-            }
-            const sel = box.querySelector('.role-dropdown-selected');
-            if (sel) sel.innerHTML = `<span class="role-pill">${roleNames[newRoleId] || '(unknown)'}</span><span class="role-dropdown-arrow">&#9662;</span>`;
-            showApplyBar();
+
+        // For add row: visually select the item
+        const listDiv = box.querySelector('.role-dropdown-list');
+        if (listDiv) {
+            listDiv.querySelectorAll('.role-dropdown-item').forEach(i => i.classList.remove('selected'));
+            item.classList.add('selected');
         }
+        const sel = box.querySelector('.role-dropdown-selected');
+        if (sel) sel.innerHTML = `<span class="role-pill">${roleNames[newRoleId] || '(unknown)'}</span><span class="role-dropdown-arrow">&#9662;</span>`;
+
         // Hide the dropdown list
-        const listDiv = box._roleDropdownList;
-        if (listDiv) listDiv.style.display = 'none';
+        const dropdownListDiv = box._roleDropdownList;
+        if (dropdownListDiv) dropdownListDiv.style.display = 'none';
+
+        // Call the change handler
+        handleRoleChange(tr, newRoleId);
     }
 });
+
+function handleRoleChange(tr, newRoleId) {
+    // Prevent duplicate role in table
+    const table = document.getElementById('mod-roles-table');
+    if (table && table.querySelector(`tr[data-role-id="${newRoleId}"]`)) return;
+    // Update row's data-role-id and id if not add row
+    if (tr.id !== 'mod-role-add-row') {
+        tr.setAttribute('data-role-id', newRoleId);
+        tr.id = `mod-role-row-${newRoleId}`;
+        // Only update the dropdown cell, not the whole row
+        const dropdownCell = tr.querySelector('td');
+        if (dropdownCell) {
+            dropdownCell.innerHTML = createRoleDropdown(
+                newRoleId,
+                roleNames,
+                Object.keys(collectModerationRoles()),
+                `role-dropdown-${newRoleId}`
+            );
+        }
+        // Update the remove button's data-role-id
+        const btn = tr.querySelector('.mod-role-remove-btn');
+        if (btn) btn.setAttribute('data-role-id', newRoleId);
+        // Update the dropdown box id
+        const dropdown = tr.querySelector('.role-dropdown-box');
+        if (dropdown) dropdown.id = `role-dropdown-${newRoleId}`;
+        showApplyBar();
+    }
+}
 
 function renderTicketSection(data) {
     const ticketDiv = document.getElementById('ticket-system');
