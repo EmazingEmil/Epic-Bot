@@ -15,7 +15,9 @@ body {
     margin: 2.5rem auto;
     max-width: 1100px;
     overflow: hidden;
-    justify-content: center;
+    justify-content: flex-start;
+    align-items: stretch;
+    width: 100%;
 }
 
 .dashboard-nav {
@@ -29,6 +31,13 @@ body {
     box-shadow: 0 4px 32px #7f5af033;
     transition: transform 0.3s cubic-bezier(.4,2,.6,1), width 0.3s;
     z-index: 20;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    left: 0;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
 }
 .dashboard-nav.collapsed {
     transform: translateX(-110%);
@@ -154,6 +163,10 @@ body {
     border-radius: 0 18px 18px 0;
     min-width: 0;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
 }
 
 .dashboard-title {
@@ -286,13 +299,20 @@ td {
 }
 
 .centered-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    min-height: 100vh;
     width: 100%;
+    align-items: flex-start;
+    justify-content: flex-start;
     padding: 2.5rem 0 2rem 0;
+}
+
+.dashboard-page {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto 2rem auto;
+    display: none;
+}
+.dashboard-page.active {
+    display: block;
 }
 
 .sidebar-toggle {
