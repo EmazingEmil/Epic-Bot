@@ -21,7 +21,7 @@ function renderModerationSection(data) {
             const roleName = roleNames[roleId] ? `${roleNames[roleId]} (${roleId})` : roleId;
             html += `<tr><td>${escapeHTML(roleName)}</td><td>${cmds.map(c => `<span class='badge enabled'>${escapeHTML(c)}</span>`).join(' ')}</td></tr>`;
         }
-        html += `</table></div>`;
+        html += `</table></div>`;q
     }
     // Warnings
     if (data.warnings && data.warnings.length > 0) {
@@ -121,11 +121,28 @@ const sidebarToggle = document.getElementById('sidebar-toggle');
 const navLinks = document.querySelectorAll('.dashboard-nav a[data-page]');
 const pages = document.querySelectorAll('.dashboard-page');
 
+function closeSidebar() {
+    sidebar.classList.add('collapsed');
+    sidebar.classList.remove('open');
+}
+function openSidebar() {
+    sidebar.classList.remove('collapsed');
+    sidebar.classList.add('open');
+}
+
 sidebarToggle.addEventListener('click', () => {
-    sidebar.classList.toggle('collapsed');
-    document.querySelector('.dashboard-main').classList.toggle('collapsed');
+    if (window.innerWidth <= 900) {
+        if (sidebar.classList.contains('open')) {
+            closeSidebar();
+        } else {
+            openSidebar();
+        }
+    } else {
+        sidebar.classList.toggle('collapsed');
+    }
 });
 
+// Close sidebar on nav click (mobile)
 navLinks.forEach(link => {
     link.addEventListener('click', e => {
         e.preventDefault();
@@ -139,6 +156,9 @@ navLinks.forEach(link => {
                 sec.classList.remove('active');
             }
         });
+        if (window.innerWidth <= 900) {
+            closeSidebar();
+        }
     });
 });
 
