@@ -167,7 +167,10 @@ document.getElementById('guild-name').textContent = 'Your Server Name';
 
 if (guildId) {
     fetch(`https://epic-bot-backend-production.up.railway.app/api/guild-dashboard?guild_id=${guildId}`)
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error('API response not ok: ' + res.status);
+            return res.json();
+        })
         .then(data => {
             // --- Collect role and user names if available ---
             if (data.role_names) roleNames = data.role_names;
@@ -191,8 +194,9 @@ if (guildId) {
                 };
             });
         })
-        .catch(() => {
-            document.getElementById('dashboard-root').innerHTML = '<div class="dashboard-card">Failed to load dashboard data.</div>';
+        .catch((err) => {
+            console.error('Dashboard fetch error:', err);
+            document.getElementById('dashboard-root').innerHTML = '<div class="dashboard-card">Failed to load dashboard data.<br>' + err + '</div>';
         });
 } else {
     document.getElementById('dashboard-root').innerText = 'No guild selected.';
