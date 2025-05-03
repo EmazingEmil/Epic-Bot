@@ -414,11 +414,11 @@ td {
     transition: background 0.15s, color 0.15s;
     font-size: 0.98rem;
     word-break: break-all;
-}
-.channel-dropdown-item.selected,
-.channel-dropdown-item:hover {
-    background: var(--primary);
-    color: #fff;
+    /* Ensure dropdown items never truncate */
+    max-width: none;
+    overflow: visible;
+    text-overflow: unset;
+    white-space: normal;
 }
 .channel-pill {
     display: inline-block;
@@ -430,10 +430,11 @@ td {
     margin-right: 0.13rem;
     margin-bottom: 0.15rem;
     box-shadow: 0 1px 4px #7f5af033;
-    max-width: 120px;
-    overflow-x: auto;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    /* Remove max-width and ellipsis to always show full name */
+    max-width: none;
+    overflow: visible;
+    text-overflow: unset;
+    white-space: normal;
 }
 
 @media (max-width: 900px) {
