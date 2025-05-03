@@ -105,6 +105,48 @@ function renderLoggingSection(data) {
 function renderLevelingSection(data) {
     const levelDiv = document.getElementById('leveling-section');
     let html = '';
+    let currentPage = 0;
+    const perPage = 10;
+    function renderLeaderboardPage(page) {
+        let out = '';
+        if (data.leaderboard && data.leaderboard.length > 0) {
+            const start = page * perPage;
+            const end = start + perPage;
+            const pageData = data.leaderboard.slice(start, end);
+            out += `<div class="dashboard-card" style="margin-bottom:2rem;"><span class="dashboard-label">Leaderboard:</span><table style="margin-top:0.7rem;"><tr><th>#</th><th>User</th><th>Level</th><th>XP</th></tr>`;
+            pageData.forEach((u, i) => {
+                const userName = userNames[u.user_id] || '';
+                out += `<tr><td>${start + i + 1}</td><td>${escapeHTML(String(userName))}</td><td>${u.level}</td><td>${u.xp}</td></tr>`;
+            });
+            out += `</table>`;
+            // Pagination buttons
+            out += `<div style="display:flex;justify-content:center;gap:1.5rem;margin-top:1.2rem;">
+                <button id="leaderboard-prev" class="btn glass-btn" ${page === 0 ? 'disabled' : ''}>&#8592;</button>
+                <button id="leaderboard-next" class="btn glass-btn" ${(end >= data.leaderboard.length) ? 'disabled' : ''}>&#8594;</button>
+            </div>`;
+            out += `</div>`;
+        } else {
+            out += `<div class="dashboard-card">No leaderboard data.</div>`;
+        }
+        return out;
+    }
+    function updateLeaderboard(page) {
+        levelDiv.innerHTML = html + renderLeaderboardPage(page);
+        const prevBtn = document.getElementById('leaderboard-prev');
+        const nextBtn = document.getElementById('leaderboard-next');
+        if (prevBtn) prevBtn.onclick = () => {
+            if (currentPage > 0) {
+                currentPage--;
+                updateLeaderboard(currentPage);
+            }
+        };
+        if (nextBtn) nextBtn.onclick = () => {
+            if ((currentPage + 1) * perPage < data.leaderboard.length) {
+                currentPage++;
+                updateLeaderboard(currentPage);
+            }
+        };
+    }
     if (data.leveling_settings) {
         html += `<div class="dashboard-card" style="margin-bottom:2rem; padding-bottom:1.2rem;">
             <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Level Up Message:</span> <span class="dashboard-value">${escapeHTML(data.leveling_settings.levelup_message || '')}</span></div>
@@ -121,18 +163,7 @@ function renderLevelingSection(data) {
         }
         html += `</table></div>`;
     }
-    // Leaderboard
-    if (data.leaderboard && data.leaderboard.length > 0) {
-        html += `<div class="dashboard-card" style="margin-bottom:2rem;"><span class="dashboard-label">Leaderboard:</span><table style="margin-top:0.7rem;"><tr><th>#</th><th>User</th><th>Level</th><th>XP</th></tr>`;
-        data.leaderboard.forEach((u, i) => {
-            const userName = userNames[u.user_id] || '';
-            html += `<tr><td>${i+1}</td><td>${escapeHTML(String(userName))}</td><td>${u.level}</td><td>${u.xp}</td></tr>`;
-        });
-        html += `</table></div>`;
-    } else {
-        html += `<div class="dashboard-card">No leaderboard data.</div>`;
-    }
-    levelDiv.innerHTML = html;
+    updateLeaderboard(currentPage);
 }
 
 function showSection(section) {
