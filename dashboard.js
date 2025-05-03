@@ -418,7 +418,7 @@ function renderModerationSection(data) {
         tr.setAttribute('data-role-id', selectedRoleId);
         tr.id = `mod-role-row-${selectedRoleId}`;
         tr.innerHTML = `<td>
-                <select class="role-select" data-role-id="${selectedRoleId}">
+                <select class="role-select styled-select" data-role-id="${selectedRoleId}">
                     <option value="">Select a role</option>
                     ${Object.entries(roleNames).map(([rid, name]) =>
                         `<option value="${rid}" ${selectedRoleId === rid ? 'selected' : ''}>${name}</option>`
