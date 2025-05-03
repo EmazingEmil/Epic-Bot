@@ -29,20 +29,22 @@ function hideLoadingSpinner() {
 function createChannelDropdown(selected, allChannels, multi = false, onChange = null) {
     const selectedArr = Array.isArray(selected) ? selected : [selected];
     const dropdownId = 'dropdown-' + Math.random().toString(36).slice(2);
-    // Calculate width based on selected channel names
-    let baseWidth = 140;
-    let maxWidth = 900;
-    let minWidth = baseWidth;
-    let totalLen = 0;
-    if (multi && selectedArr.length > 0) {
-        totalLen = selectedArr.reduce((acc, cid) => acc + ((allChannels[cid] || '').length), 0);
-        // Each channel pill: 18px padding + 9px per char, plus 10px gap
-        minWidth = Math.min(Math.max(baseWidth, 32 + selectedArr.length * 18 + totalLen * 9 + (selectedArr.length-1)*10), maxWidth);
-    } else if (!multi && selectedArr.length === 1) {
-        minWidth = Math.min(Math.max(baseWidth, 32 + (allChannels[selectedArr[0]] || '').length * 11), maxWidth);
+    // Function to calculate width based on selected channel names
+    function calcWidth(selectedArr) {
+        let baseWidth = 140;
+        let maxWidth = 900;
+        let minWidth = baseWidth;
+        let totalLen = 0;
+        if (multi && selectedArr.length > 0) {
+            totalLen = selectedArr.reduce((acc, cid) => acc + ((allChannels[cid] || '').length), 0);
+            minWidth = Math.min(Math.max(baseWidth, 32 + selectedArr.length * 18 + totalLen * 9 + (selectedArr.length-1)*10), maxWidth);
+        } else if (!multi && selectedArr.length === 1) {
+            minWidth = Math.min(Math.max(baseWidth, 32 + (allChannels[selectedArr[0]] || '').length * 11), maxWidth);
+        }
+        return minWidth;
     }
-    // Always set width, not just min/max, so the dropdown grows horizontally
-    let width = minWidth;
+    let width = calcWidth(selectedArr);
+    let maxWidth = 900;
     let html = `<div class="channel-dropdown-box" tabindex="0" id="${dropdownId}" style="width:${width}px;min-width:${width}px;max-width:${maxWidth}px;">
         <div class="channel-dropdown-selected" style="width:${width-10}px;max-width:${maxWidth-10}px;">
             ${selectedArr.map(cid => `<span class="channel-pill">${allChannels[cid] || '(unknown)'}</span>`).join(multi ? ', ' : '')}
@@ -59,6 +61,14 @@ function createChannelDropdown(selected, allChannels, multi = false, onChange = 
         if (!box) return;
         const selectedDiv = box.querySelector('.channel-dropdown-selected');
         const listDiv = box.querySelector('.channel-dropdown-list');
+        function updateDropdownWidth(newSelectedArr) {
+            const newWidth = calcWidth(newSelectedArr);
+            box.style.width = newWidth + 'px';
+            box.style.minWidth = newWidth + 'px';
+            selectedDiv.style.width = (newWidth-10) + 'px';
+            listDiv.style.width = newWidth + 'px';
+            listDiv.style.minWidth = newWidth + 'px';
+        }
         selectedDiv.onclick = () => {
             listDiv.style.display = listDiv.style.display === 'block' ? 'none' : 'block';
         };
@@ -75,12 +85,14 @@ function createChannelDropdown(selected, allChannels, multi = false, onChange = 
                     const selectedCids = Array.from(listDiv.querySelectorAll('.channel-dropdown-item.selected')).map(i => i.getAttribute('data-cid'));
                     if (onChange) onChange(selectedCids);
                     selectedDiv.innerHTML = selectedCids.map(cid => `<span class="channel-pill">${allChannels[cid] || '(unknown)'}</span>`).join(', ') + '<span class="channel-dropdown-arrow">&#9662;</span>';
+                    updateDropdownWidth(selectedCids);
                 } else {
                     listDiv.querySelectorAll('.channel-dropdown-item').forEach(i => i.classList.remove('selected'));
                     item.classList.add('selected');
                     if (onChange) onChange(item.getAttribute('data-cid'));
                     selectedDiv.innerHTML = `<span class="channel-pill">${allChannels[item.getAttribute('data-cid')] || '(unknown)'}</span><span class="channel-dropdown-arrow">&#9662;</span>`;
                     listDiv.style.display = 'none';
+                    updateDropdownWidth([item.getAttribute('data-cid')]);
                 }
             };
         });
