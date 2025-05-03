@@ -443,6 +443,76 @@ td {
     white-space: normal;
 }
 
+.apply-changes-bar {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100vw;
+    background: #232336ee;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 1.1rem 0.5rem;
+    z-index: 9999;
+    box-shadow: 0 -2px 16px #7f5af033;
+    font-size: 1.15rem;
+    font-weight: 500;
+    transition: transform 0.2s, opacity 0.2s;
+}
+.apply-btn {
+    background: #2cb67d;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.7rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 1.2rem;
+    transition: background 0.15s;
+}
+.apply-btn:disabled {
+    background: #1e7a4d;
+    cursor: not-allowed;
+}
+.cancel-btn {
+    background: #e05f5f;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.7rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 0.7rem;
+    transition: background 0.15s;
+}
+.cancel-btn:disabled {
+    background: #a33a3a;
+    cursor: not-allowed;
+}
+.apply-changes-bar .dot {
+    animation: blink 1.2s infinite both;
+    font-weight: bold;
+    font-size: 1.3em;
+}
+.apply-changes-bar .dot:nth-child(2) { animation-delay: 0.2s; }
+.apply-changes-bar .dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink {
+    0%, 80%, 100% { opacity: 0.2; }
+    40% { opacity: 1; }
+}
+.apply-changes-bar.success {
+    background: #2cb67d;
+    color: #fff;
+}
+.apply-changes-bar.error {
+    background: #e05f5f;
+    color: #fff;
+}
+
 @media (max-width: 900px) {
     .dashboard-container {
         flex-direction: column;
