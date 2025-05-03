@@ -83,7 +83,7 @@ function createChannelDropdown(selected, allChannels, multi = false, onChange = 
     return html;
 }
 
-// Helper for styled role dropdown
+// Helper for styled role dropdown (with portal for dropdown list)
 function createRoleDropdown(selected, allRoles, exclude = [], id = '', onChange = null) {
     const dropdownId = id || 'role-dropdown-' + Math.random().toString(36).slice(2);
     let html = `<div class="role-dropdown-box" tabindex="0" id="${dropdownId}">
@@ -102,10 +102,31 @@ function createRoleDropdown(selected, allRoles, exclude = [], id = '', onChange 
         if (!box) return;
         const selectedDiv = box.querySelector('.role-dropdown-selected');
         const listDiv = box.querySelector('.role-dropdown-list');
+        // --- Portal logic: move dropdown list to body for visibility ---
+        if (!listDiv._portalized) {
+            listDiv._portalized = true;
+            document.body.appendChild(listDiv);
+            box._roleDropdownList = listDiv;
+        }
+        function positionDropdown() {
+            const rect = box.getBoundingClientRect();
+            listDiv.style.position = 'absolute';
+            listDiv.style.left = (rect.left + window.scrollX) + 'px';
+            listDiv.style.top = (rect.bottom + window.scrollY) + 'px';
+            listDiv.style.width = rect.width + 'px';
+            listDiv.style.zIndex = 9999;
+        }
         selectedDiv.onclick = () => {
-            listDiv.style.display = listDiv.style.display === 'block' ? 'none' : 'block';
+            if (listDiv.style.display === 'block') {
+                listDiv.style.display = 'none';
+            } else {
+                positionDropdown();
+                listDiv.style.display = 'block';
+            }
         };
         box.onblur = () => { listDiv.style.display = 'none'; };
+        window.addEventListener('scroll', () => { if (listDiv.style.display === 'block') positionDropdown(); }, true);
+        window.addEventListener('resize', () => { if (listDiv.style.display === 'block') positionDropdown(); });
         listDiv.querySelectorAll('.role-dropdown-item').forEach(item => {
             item.onclick = (e) => {
                 e.stopPropagation();
@@ -114,7 +135,15 @@ function createRoleDropdown(selected, allRoles, exclude = [], id = '', onChange 
                 if (onChange) onChange(item.getAttribute('data-rid'));
                 selectedDiv.innerHTML = `<span class="role-pill">${allRoles[item.getAttribute('data-rid')] || '(unknown)'}</span><span class="role-dropdown-arrow">&#9662;</span>`;
                 listDiv.style.display = 'none';
+                // --- Always show apply bar on change ---
+                showApplyBar();
             };
+        });
+        // Hide dropdown if clicking outside
+        document.addEventListener('mousedown', function handler(e) {
+            if (!box.contains(e.target) && !listDiv.contains(e.target)) {
+                listDiv.style.display = 'none';
+            }
         });
     }, 0);
     return html;
@@ -373,7 +402,9 @@ function renderModerationSection(data) {
         const rowId = `mod-role-row-${roleId}`;
         html += `<tr data-role-id="${roleId}" id="${rowId}">
             <td>
-                ${createRoleDropdown(roleId, roleNames, usedRoleIds.filter(rid => rid !== roleId), `role-dropdown-${roleId}`)}
+                ${createRoleDropdown(roleId, roleNames, usedRoleIds.filter(rid => rid !== roleId), `role-dropdown-${roleId}`, function() {
+                    showApplyBar(); // Always show apply bar on role change
+                })}
             </td>
             <td>
                 ${createCommandDropdown(cmds, ALL_MOD_COMMANDS, `cmd-dropdown-${roleId}`)}
@@ -386,7 +417,9 @@ function renderModerationSection(data) {
     // Add new role row
     html += `<tr id="mod-role-add-row">
         <td>
-            ${createRoleDropdown('', roleNames, usedRoleIds, 'mod-role-add-select')}
+            ${createRoleDropdown('', roleNames, usedRoleIds, 'mod-role-add-select', function() {
+                showApplyBar();
+            })}
         </td>
         <td>
             ${createCommandDropdown([], ALL_MOD_COMMANDS, 'mod-role-add-cmds')}
