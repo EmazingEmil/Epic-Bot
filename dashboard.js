@@ -29,10 +29,16 @@ function hideLoadingSpinner() {
 function createChannelDropdown(selected, allChannels, multi = false, onChange = null) {
     const selectedArr = Array.isArray(selected) ? selected : [selected];
     const dropdownId = 'dropdown-' + Math.random().toString(36).slice(2);
-    // Calculate width for multi-select: wider if more channels selected
-    let minWidth = 140, maxWidth = 320;
-    if (multi && selectedArr.length > 1) {
-        minWidth = Math.min(220 + selectedArr.length * 40, maxWidth);
+    // Calculate width based on selected channel names
+    let baseWidth = 140;
+    let maxWidth = 520;
+    let minWidth = baseWidth;
+    if (multi && selectedArr.length > 0) {
+        // Estimate width: 16px padding + 8px per channel + 9px per char
+        let totalLen = selectedArr.reduce((acc, cid) => acc + ((allChannels[cid] || '').length), 0);
+        minWidth = Math.min(Math.max(baseWidth, 32 + selectedArr.length * 32 + totalLen * 9), maxWidth);
+    } else if (!multi && selectedArr.length === 1) {
+        minWidth = Math.min(Math.max(baseWidth, 32 + (allChannels[selectedArr[0]] || '').length * 11), maxWidth);
     }
     let html = `<div class="channel-dropdown-box" tabindex="0" id="${dropdownId}" style="min-width:${minWidth}px;max-width:${maxWidth}px;">
         <div class="channel-dropdown-selected" style="max-width:${maxWidth - 20}px;">
