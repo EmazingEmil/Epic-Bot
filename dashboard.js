@@ -203,10 +203,11 @@ function applyDropdownChanges() {
             }
             return null;
         }).filter(Boolean);
-        if (label.includes('panel channel')) {
-            ticket_settings.channel_id = selectedIds[0] || null;
-        } else if (label.includes('log channel') && drop.parentElement.parentElement.id === 'ticket-system') {
+        // --- Fix: Use .ticket-log-dropdown to identify the ticket log channel dropdown ---
+        if (drop.parentElement && drop.parentElement.classList.contains('ticket-log-dropdown')) {
             ticket_settings.log_channel_id = selectedIds[0] || null;
+        } else if (label.includes('panel channel')) {
+            ticket_settings.channel_id = selectedIds[0] || null;
         } else if (label.includes('log channel')) {
             log_settings.log_channel_id = selectedIds[0] || null;
         } else if (label.includes('selected channels')) {
@@ -291,7 +292,7 @@ function renderTicketSection(data) {
     }
     let html = `<div class="dashboard-card" style="margin-bottom:2rem; padding-bottom:1.2rem;">
         <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Panel Channel:</span> ${createChannelDropdown(data.ticket_settings.channel_id, channelNames)}</div>
-        <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Log Channel:</span> ${createChannelDropdown(data.ticket_settings.log_channel_id, channelNames)}</div>
+        <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Log Channel:</span> <span class="ticket-log-dropdown">${createChannelDropdown(data.ticket_settings.log_channel_id, channelNames)}</span></div>
         <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Rules:</span> <span class="dashboard-value">${escapeHTML(data.ticket_settings.rules_text || '')}</span></div>
         <div><span class="dashboard-label">Ticket Message:</span> <span class="dashboard-value">${escapeHTML(data.ticket_settings.ticket_msg || '')}</span></div>
     </div>`;
