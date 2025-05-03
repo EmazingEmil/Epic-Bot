@@ -371,10 +371,11 @@ function renderModerationSection(data) {
     const usedRoleIds = Object.keys(data.moderation_roles || {});
     for (const [roleId, cmds] of Object.entries(data.moderation_roles || {})) {
         const rowId = `mod-role-row-${roleId}`;
-        const exclude = usedRoleIds.filter(rid => rid !== roleId);
         html += `<tr data-role-id="${roleId}" id="${rowId}">
             <td>
-                ${createRoleDropdown(roleId, roleNames, `role-dropdown-${roleId}`)}
+                ${createRoleDropdown(roleId, roleNames, `role-dropdown-${roleId}`, function(newRoleId) {
+                    // This callback will be attached after rendering below
+                })}
             </td>
             <td>
                 ${createCommandDropdown(cmds, ALL_MOD_COMMANDS, `cmd-dropdown-${roleId}`)}
@@ -387,7 +388,9 @@ function renderModerationSection(data) {
     // Add new role row
     html += `<tr id="mod-role-add-row">
         <td>
-            ${createRoleDropdown('', roleNames, 'role-dropdown-add')}
+            ${createRoleDropdown('', roleNames, 'role-dropdown-add', function(newRoleId) {
+                // This callback will be attached after rendering below
+            })}
         </td>
         <td>
             ${createCommandDropdown([], ALL_MOD_COMMANDS, 'mod-role-add-cmds')}
@@ -411,23 +414,21 @@ function renderModerationSection(data) {
 
     // --- Moderation Role Editing Logic ---
 
-    // Event listener for role selection changes
-    document.querySelectorAll('.role-select').forEach(select => {
-        select.addEventListener('change', function() {
-            const newRoleId = this.value;
-            const tr = this.closest('tr');
-            if (!tr) return;
-            const roleName = roleNames[newRoleId] || '(unknown)';
-
-            // Update row attributes
-            tr.setAttribute('data-role-id', newRoleId);
-            tr.id = `mod-role-row-${newRoleId}`;
-
-            // Update remove button
-            const btn = tr.querySelector('.mod-role-remove-btn');
-            if (btn) btn.setAttribute('data-role-id', newRoleId);
-
-            showApplyBar();
+    // Attach onChange for all role dropdowns to update row and show apply bar
+    document.querySelectorAll('.role-dropdown-box').forEach(box => {
+        const tr = box.closest('tr');
+        box.querySelectorAll('.role-dropdown-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const newRoleId = this.getAttribute('data-role-id');
+                if (tr) {
+                    tr.setAttribute('data-role-id', newRoleId);
+                    tr.id = `mod-role-row-${newRoleId}`;
+                    // Update remove button
+                    const btn = tr.querySelector('.mod-role-remove-btn');
+                    if (btn) btn.setAttribute('data-role-id', newRoleId);
+                    showApplyBar();
+                }
+            });
         });
     });
 
@@ -468,6 +469,21 @@ function renderModerationSection(data) {
             if (sel) sel.innerHTML = '<span class="command-dropdown-arrow">&#9662;</span>';
         }
         showApplyBar();
+
+        // Attach onChange for the new row's role dropdown
+        const newBox = tr.querySelector('.role-dropdown-box');
+        if (newBox) {
+            newBox.querySelectorAll('.role-dropdown-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const newRoleId = this.getAttribute('data-role-id');
+                    tr.setAttribute('data-role-id', newRoleId);
+                    tr.id = `mod-role-row-${newRoleId}`;
+                    const btn = tr.querySelector('.mod-role-remove-btn');
+                    if (btn) btn.setAttribute('data-role-id', newRoleId);
+                    showApplyBar();
+                });
+            });
+        }
     };
 
     setTimeout(setupDropdownChangeDetection, 0);
