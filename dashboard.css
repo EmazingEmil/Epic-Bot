@@ -352,6 +352,84 @@ td {
     color: var(--primary);
 }
 
+.channel-dropdown-box {
+    display: inline-block;
+    position: relative;
+    min-width: 180px;
+    background: var(--glass);
+    border: 1.5px solid var(--primary);
+    border-radius: 10px;
+    cursor: pointer;
+    margin: 0 0.3rem 0.3rem 0;
+    transition: box-shadow 0.2s;
+    box-shadow: 0 2px 10px #7f5af033;
+}
+.channel-dropdown-box:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--primary);
+}
+.channel-dropdown-selected {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1.1rem 0.5rem 0.8rem;
+    font-size: 1.05rem;
+    color: var(--primary);
+    min-height: 32px;
+    user-select: none;
+}
+.channel-dropdown-arrow {
+    margin-left: 0.5rem;
+    font-size: 1.1em;
+    color: var(--primary);
+    transition: transform 0.2s;
+}
+.channel-dropdown-box:focus .channel-dropdown-arrow,
+.channel-dropdown-box .channel-dropdown-list[style*='block'] ~ .channel-dropdown-arrow {
+    transform: rotate(180deg);
+}
+.channel-dropdown-list {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    min-width: 100%;
+    background: var(--glass);
+    border: 1.5px solid var(--primary);
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 6px 24px #7f5af055;
+    z-index: 100;
+    max-height: 220px;
+    overflow-y: auto;
+    margin-top: 2px;
+}
+.channel-dropdown-box:focus .channel-dropdown-list {
+    display: block;
+}
+.channel-dropdown-item {
+    padding: 0.6rem 1.1rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    font-size: 1.05rem;
+}
+.channel-dropdown-item.selected,
+.channel-dropdown-item:hover {
+    background: var(--primary);
+    color: #fff;
+}
+.channel-pill {
+    display: inline-block;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 7px;
+    padding: 0.2rem 0.7rem;
+    font-size: 0.98rem;
+    margin-right: 0.2rem;
+    margin-bottom: 0.1rem;
+    box-shadow: 0 1px 4px #7f5af033;
+}
+
 @media (max-width: 900px) {
     .dashboard-container {
         flex-direction: column;
