@@ -412,6 +412,9 @@ function renderModerationSection(data) {
                     // Also update the remove button's data-role-id
                     const btn = tr.querySelector('.mod-role-remove-btn');
                     if (btn) btn.setAttribute('data-role-id', newRoleId);
+                    // Also update the dropdown's id so future changes work
+                    const dropdown = tr.querySelector('.role-dropdown-box');
+                    if (dropdown) dropdown.id = `role-dropdown-${newRoleId}`;
                     showApplyBar();
                 })}
             </td>
@@ -474,8 +477,8 @@ function renderModerationSection(data) {
                 cmds = Array.from(addCmdDropdownBox.querySelectorAll('.command-dropdown-item.selected')).map(i => i.getAttribute('data-cmd'));
             }
         }
+        // Prevent duplicate or empty
         if (!selectedRoleId || cmds.length === 0) return;
-        // Prevent duplicate
         if (document.querySelector(`#mod-roles-table tr[data-role-id="${selectedRoleId}"]`)) return;
         const table = document.getElementById('mod-roles-table');
         const tr = document.createElement('tr');
@@ -489,6 +492,8 @@ function renderModerationSection(data) {
                     tr.id = `mod-role-row-${newRoleId}`;
                     const btn = tr.querySelector('.mod-role-remove-btn');
                     if (btn) btn.setAttribute('data-role-id', newRoleId);
+                    const dropdown = tr.querySelector('.role-dropdown-box');
+                    if (dropdown) dropdown.id = `role-dropdown-${newRoleId}`;
                     showApplyBar();
                 })}
             </td>
@@ -513,6 +518,11 @@ function renderModerationSection(data) {
             addCmdDropdownBox.querySelectorAll('.command-dropdown-item.selected').forEach(i => i.classList.remove('selected'));
             const sel = addCmdDropdownBox.querySelector('.command-dropdown-selected');
             if (sel) sel.innerHTML = '<span class="command-dropdown-arrow">&#9662;</span>';
+        }
+        // Reset add role dropdown selection
+        if (addRoleDropdownBox) {
+            const sel = addRoleDropdownBox.querySelector('.role-dropdown-selected');
+            if (sel) sel.innerHTML = '<span class="role-dropdown-arrow">&#9662;</span>';
         }
         showApplyBar();
         setupModRoleEvents();
