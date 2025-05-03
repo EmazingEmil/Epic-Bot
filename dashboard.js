@@ -247,6 +247,7 @@ function renderTicketSection(data) {
         html += `</table></div>`;
     }
     ticketDiv.innerHTML = html;
+    setTimeout(setupDropdownChangeDetection, 0);
 }
 
 function renderLoggingSection(data) {
@@ -264,6 +265,7 @@ function renderLoggingSection(data) {
     }
     html += `</div>`;
     logDiv.innerHTML = html;
+    setTimeout(setupDropdownChangeDetection, 0);
 }
 
 function renderLevelingSection(data) {
@@ -333,6 +335,7 @@ function renderLevelingSection(data) {
         html += `</table></div>`;
     }
     updateLeaderboard(currentPage);
+    setTimeout(setupDropdownChangeDetection, 0);
 }
 
 function showSection(section) {
