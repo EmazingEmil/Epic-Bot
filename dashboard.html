@@ -4,43 +4,46 @@
     <meta charset="UTF-8">
     <title>Epic Bot Dashboard</title>
     <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="Epic Bot.png">
 </head>
-<body>
-    <nav class="dashboard-nav">
+<body style="background: var(--bg); color: var(--text); font-family: 'Montserrat', sans-serif;">
+    <nav class="dashboard-nav glass">
         <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar">☰</button>
-        <div class="logo">
-            <img src="Epic Bot.png" alt="Epic Bot Logo" /> Epic Bot
+        <div class="logo" style="font-size:2rem;font-weight:700;letter-spacing:2px;color:var(--primary);display:flex;align-items:center;gap:0.6rem;">
+            <img src="Epic Bot.png" alt="Epic Bot Logo" style="height:2.2rem;border-radius:50%;background:#fff;"> Epic Bot
         </div>
         <ul>
-            <li><a href="#overview" class="active" data-page="overview"><span class="icon">🏠</span>Overview</a></li>
-            <li><a href="#moderation" data-page="moderation"><span class="icon">🛡️</span>Moderation</a></li>
-            <li><a href="#tickets" data-page="tickets"><span class="icon">🎫</span>Tickets</a></li>
-            <li><a href="#logging" data-page="logging"><span class="icon">📜</span>Logging</a></li>
-            <li><a href="#leveling" data-page="leveling"><span class="icon">🏆</span>Leveling</a></li>
+            <li><a href="#overview" class="active nav-link" data-page="overview"><span class="icon">🏠</span>Overview</a></li>
+            <li><a href="#moderation" class="nav-link" data-page="moderation"><span class="icon">🛡️</span>Moderation</a></li>
+            <li><a href="#tickets" class="nav-link" data-page="tickets"><span class="icon">🎫</span>Tickets</a></li>
+            <li><a href="#logging" class="nav-link" data-page="logging"><span class="icon">📜</span>Logging</a></li>
+            <li><a href="#leveling" class="nav-link" data-page="leveling"><span class="icon">🏆</span>Leveling</a></li>
         </ul>
         <div class="nav-footer">&copy; 2025 Epic Bot</div>
     </nav>
     <main class="dashboard-main">
-        <div class="dashboard-title">Epic Bot Dashboard</div>
+        <div class="dashboard-title gradient-text" style="margin-bottom:1.2rem;">Epic Bot Dashboard</div>
         <div class="dashboard-guild" id="guild-name"></div>
         <div id="dashboard-root">
-            <section class="dashboard-page active" id="page-overview">
+            <section class="dashboard-page active glass" id="page-overview" style="margin-bottom:2rem;">
                 <div class="dashboard-section-title"><span>Guild Overview</span></div>
                 <div id="guild-info"></div>
             </section>
-            <section class="dashboard-page" id="page-moderation">
+            <section class="dashboard-page glass" id="page-moderation" style="margin-bottom:2rem;">
                 <div class="dashboard-section-title"><span>Moderation</span> <button class="dashboard-btn" id="mod-settings-btn">Settings</button></div>
                 <div id="moderation-setup"></div>
             </section>
-            <section class="dashboard-page" id="page-tickets">
+            <section class="dashboard-page glass" id="page-tickets" style="margin-bottom:2rem;">
                 <div class="dashboard-section-title"><span>Ticket System</span> <button class="dashboard-btn" id="ticket-settings-btn">Settings</button></div>
                 <div id="ticket-system"></div>
             </section>
-            <section class="dashboard-page" id="page-logging">
+            <section class="dashboard-page glass" id="page-logging" style="margin-bottom:2rem;">
                 <div class="dashboard-section-title"><span>Logging</span> <button class="dashboard-btn" id="log-settings-btn">Settings</button></div>
                 <div id="logging-section"></div>
             </section>
-            <section class="dashboard-page" id="page-leveling">
+            <section class="dashboard-page glass" id="page-leveling" style="margin-bottom:2rem;">
                 <div class="dashboard-section-title"><span>Leveling</span> <button class="dashboard-btn" id="level-settings-btn">Settings</button></div>
                 <div id="leveling-section"></div>
             </section>
