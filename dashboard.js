@@ -10,6 +10,22 @@ let roleNames = {};
 let userNames = {};
 let channelNames = {};
 
+// --- Loading spinner ---
+function showLoadingSpinner() {
+    let spinner = document.getElementById('dashboard-loading-spinner');
+    if (!spinner) {
+        spinner = document.createElement('div');
+        spinner.id = 'dashboard-loading-spinner';
+        spinner.innerHTML = `<div class="spinner-glass"><div class="spinner"></div></div>`;
+        document.getElementById('dashboard-root').appendChild(spinner);
+    }
+    spinner.style.display = 'flex';
+}
+function hideLoadingSpinner() {
+    const spinner = document.getElementById('dashboard-loading-spinner');
+    if (spinner) spinner.style.display = 'none';
+}
+
 function renderModerationSection(data) {
     const modDiv = document.getElementById('moderation-setup');
     let html = `<div class="dashboard-card">
@@ -119,11 +135,19 @@ function renderLevelingSection(data) {
 function showSection(section) {
     document.querySelectorAll('.dashboard-page').forEach(page => {
         if (page.id === `page-${section}`) {
-            page.style.display = '';
+            page.classList.add('active');
         } else {
-            page.style.display = 'none';
+            page.classList.remove('active');
         }
     });
+    // Animate section fade-in
+    setTimeout(() => {
+        const active = document.querySelector('.dashboard-page.active');
+        if (active) {
+            active.style.opacity = 1;
+            active.style.transform = 'translateY(0)';
+        }
+    }, 10);
 }
 
 // Sidebar navigation logic
@@ -165,6 +189,9 @@ navLinks.forEach(link => {
             closeSidebar();
         }
     });
+    // Add smooth highlight for active link
+    link.addEventListener('mouseenter', () => link.classList.add('hovered'));
+    link.addEventListener('mouseleave', () => link.classList.remove('hovered'));
 });
 
 // On load, show only the overview section
@@ -174,12 +201,14 @@ showSection('overview');
 document.getElementById('guild-name').textContent = 'Your Server Name';
 
 if (guildId) {
+    showLoadingSpinner();
     fetch(`https://epic-bot-backend-production.up.railway.app/api/guild-dashboard?guild_id=${guildId}`)
         .then(res => {
             if (!res.ok) throw new Error('API response not ok: ' + res.status);
             return res.json();
         })
         .then(data => {
+            hideLoadingSpinner();
             // --- Collect role, user, and channel names if available ---
             if (data.role_names) roleNames = data.role_names;
             if (data.user_names) userNames = data.user_names;
@@ -187,7 +216,7 @@ if (guildId) {
             // Guild Info
             const guildInfoDiv = document.getElementById('guild-info');
             guildInfoDiv.innerHTML = `<div class="dashboard-card">
-                <span class="dashboard-label">Guild ID:</span> <span class="dashboard-value">${escapeHTML(String(data.guild_info.id))}</span>
+                <span class="dashboard-label">Guild ID:</span> <span class="dashboard-value" data-id="${escapeHTML(String(data.guild_info.id))}">${escapeHTML(String(data.guild_info.id))}</span>
                 ${data.guild_info.name ? `<br><span class='dashboard-label'>Guild Name:</span> <span class='dashboard-value'>${escapeHTML(data.guild_info.name)}</span>` : ''}
             </div>`;
             renderModerationSection(data);
@@ -204,9 +233,34 @@ if (guildId) {
             });
         })
         .catch((err) => {
+            hideLoadingSpinner();
             console.error('Dashboard fetch error:', err);
             document.getElementById('dashboard-root').innerHTML = '<div class="dashboard-card">Failed to load dashboard data.<br>' + err + '</div>';
         });
 } else {
     document.getElementById('dashboard-root').innerText = 'No guild selected.';
 }
+
+// --- Tooltip for IDs on hover ---
+document.addEventListener('mouseover', function(e) {
+    if (e.target && e.target.classList.contains('dashboard-value') && e.target.dataset.id) {
+        let tooltip = document.getElementById('dashboard-tooltip');
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.id = 'dashboard-tooltip';
+            tooltip.className = 'dashboard-tooltip';
+            document.body.appendChild(tooltip);
+        }
+        tooltip.textContent = e.target.dataset.id;
+        tooltip.style.display = 'block';
+        const rect = e.target.getBoundingClientRect();
+        tooltip.style.left = rect.left + window.scrollX + 'px';
+        tooltip.style.top = rect.bottom + window.scrollY + 4 + 'px';
+    }
+});
+document.addEventListener('mouseout', function(e) {
+    if (e.target && e.target.classList.contains('dashboard-value')) {
+        const tooltip = document.getElementById('dashboard-tooltip');
+        if (tooltip) tooltip.style.display = 'none';
+    }
+});
