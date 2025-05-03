@@ -31,6 +31,39 @@ function hideLoadingSpinner() {
     if (spinner) spinner.style.display = 'none';
 }
 
+function attachFloatingDropdown(box, listDiv, triggerDiv) {
+    // Move listDiv to body and position it
+    function openDropdown() {
+        const rect = triggerDiv.getBoundingClientRect();
+        listDiv.style.position = 'fixed';
+        listDiv.style.left = rect.left + 'px';
+        listDiv.style.top = (rect.bottom + window.scrollY) + 'px';
+        listDiv.style.width = rect.width + 'px';
+        listDiv.style.display = 'block';
+        listDiv.style.zIndex = 999999;
+        document.body.appendChild(listDiv);
+        // Close on click outside
+        function closeDropdown(e) {
+            if (!listDiv.contains(e.target) && !triggerDiv.contains(e.target)) {
+                listDiv.style.display = 'none';
+                window.removeEventListener('mousedown', closeDropdown);
+                // Optionally move back to box for cleanup
+                box.appendChild(listDiv);
+            }
+        }
+        window.addEventListener('mousedown', closeDropdown);
+    }
+    triggerDiv.onclick = (e) => {
+        e.stopPropagation();
+        if (listDiv.style.display === 'block') {
+            listDiv.style.display = 'none';
+            box.appendChild(listDiv);
+        } else {
+            openDropdown();
+        }
+    };
+}
+
 function createChannelDropdown(selected, allChannels, multi = false, onChange = null) {
     const selectedArr = Array.isArray(selected) ? selected : [selected];
     const dropdownId = 'dropdown-' + Math.random().toString(36).slice(2);
@@ -54,10 +87,7 @@ function createChannelDropdown(selected, allChannels, multi = false, onChange = 
         if (!box) return;
         const selectedDiv = box.querySelector('.channel-dropdown-selected');
         const listDiv = box.querySelector('.channel-dropdown-list');
-        selectedDiv.onclick = () => {
-            listDiv.style.display = listDiv.style.display === 'block' ? 'none' : 'block';
-        };
-        box.onblur = () => { listDiv.style.display = 'none'; };
+        attachFloatingDropdown(box, listDiv, selectedDiv);
         listDiv.querySelectorAll('.channel-dropdown-item').forEach(item => {
             item.onclick = (e) => {
                 e.stopPropagation();
@@ -76,6 +106,7 @@ function createChannelDropdown(selected, allChannels, multi = false, onChange = 
                     if (onChange) onChange(item.getAttribute('data-cid'));
                     selectedDiv.innerHTML = `<span class="channel-pill">${allChannels[item.getAttribute('data-cid')] || '(unknown)'}</span><span class="channel-dropdown-arrow">&#9662;</span>`;
                     listDiv.style.display = 'none';
+                    box.appendChild(listDiv);
                 }
             };
         });
@@ -103,10 +134,7 @@ function createCommandDropdown(selected, allCommands, id = '', onChange = null) 
         if (!box) return;
         const selectedDiv = box.querySelector('.command-dropdown-selected');
         const listDiv = box.querySelector('.command-dropdown-list');
-        selectedDiv.onclick = () => {
-            listDiv.style.display = listDiv.style.display === 'block' ? 'none' : 'block';
-        };
-        box.onblur = () => { listDiv.style.display = 'none'; };
+        attachFloatingDropdown(box, listDiv, selectedDiv);
         listDiv.querySelectorAll('.command-dropdown-item').forEach(item => {
             item.onclick = (e) => {
                 e.stopPropagation();
@@ -141,10 +169,7 @@ function createRoleDropdown(selected, allRoles, id = '', onChange = null) {
         if (!box) return;
         const selectedDiv = box.querySelector('.role-dropdown-selected');
         const listDiv = box.querySelector('.role-dropdown-list');
-        selectedDiv.onclick = () => {
-            listDiv.style.display = listDiv.style.display === 'block' ? 'none' : 'block';
-        };
-        box.onblur = () => { listDiv.style.display = 'none'; };
+        attachFloatingDropdown(box, listDiv, selectedDiv);
         listDiv.querySelectorAll('.role-dropdown-item').forEach(item => {
             item.onclick = (e) => {
                 e.stopPropagation();
@@ -153,6 +178,7 @@ function createRoleDropdown(selected, allRoles, id = '', onChange = null) {
                 if (onChange) onChange(item.getAttribute('data-role-id'));
                 selectedDiv.innerHTML = `<span class="role-pill">${allRoles[item.getAttribute('data-role-id')] || '(unknown)'}</span><span class="role-dropdown-arrow">&#9662;</span>`;
                 listDiv.style.display = 'none';
+                box.appendChild(listDiv);
             };
         });
     }, 0);
