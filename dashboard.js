@@ -31,21 +31,24 @@ function createChannelDropdown(selected, allChannels, multi = false, onChange = 
     const dropdownId = 'dropdown-' + Math.random().toString(36).slice(2);
     // Calculate width based on selected channel names
     let baseWidth = 140;
-    let maxWidth = 520;
+    let maxWidth = 900;
     let minWidth = baseWidth;
+    let totalLen = 0;
     if (multi && selectedArr.length > 0) {
-        // Estimate width: 16px padding + 8px per channel + 9px per char
-        let totalLen = selectedArr.reduce((acc, cid) => acc + ((allChannels[cid] || '').length), 0);
-        minWidth = Math.min(Math.max(baseWidth, 32 + selectedArr.length * 32 + totalLen * 9), maxWidth);
+        totalLen = selectedArr.reduce((acc, cid) => acc + ((allChannels[cid] || '').length), 0);
+        // Each channel pill: 18px padding + 9px per char, plus 10px gap
+        minWidth = Math.min(Math.max(baseWidth, 32 + selectedArr.length * 18 + totalLen * 9 + (selectedArr.length-1)*10), maxWidth);
     } else if (!multi && selectedArr.length === 1) {
         minWidth = Math.min(Math.max(baseWidth, 32 + (allChannels[selectedArr[0]] || '').length * 11), maxWidth);
     }
-    let html = `<div class="channel-dropdown-box" tabindex="0" id="${dropdownId}" style="min-width:${minWidth}px;max-width:${maxWidth}px;">
-        <div class="channel-dropdown-selected" style="max-width:${maxWidth - 20}px;">
+    // Always set width, not just min/max, so the dropdown grows horizontally
+    let width = minWidth;
+    let html = `<div class="channel-dropdown-box" tabindex="0" id="${dropdownId}" style="width:${width}px;min-width:${width}px;max-width:${maxWidth}px;">
+        <div class="channel-dropdown-selected" style="width:${width-10}px;max-width:${maxWidth-10}px;">
             ${selectedArr.map(cid => `<span class="channel-pill">${allChannels[cid] || '(unknown)'}</span>`).join(multi ? ', ' : '')}
             <span class="channel-dropdown-arrow">&#9662;</span>
         </div>
-        <div class="channel-dropdown-list" style="display:none;min-width:${minWidth}px;max-width:${maxWidth}px;">
+        <div class="channel-dropdown-list" style="display:none;width:${width}px;min-width:${width}px;max-width:${maxWidth}px;">
             ${Object.entries(allChannels).map(([cid, name]) => `
                 <div class="channel-dropdown-item${selectedArr.includes(cid) ? ' selected' : ''}" data-cid="${cid}">${name}</div>
             `).join('')}
