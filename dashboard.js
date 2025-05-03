@@ -26,12 +26,59 @@ function hideLoadingSpinner() {
     if (spinner) spinner.style.display = 'none';
 }
 
+function createChannelDropdown(selected, allChannels, multi = false, onChange = null) {
+    const selectedArr = Array.isArray(selected) ? selected : [selected];
+    const dropdownId = 'dropdown-' + Math.random().toString(36).slice(2);
+    let html = `<div class="channel-dropdown-box" tabindex="0" id="${dropdownId}">
+        <div class="channel-dropdown-selected">
+            ${selectedArr.map(cid => `<span class="channel-pill">${allChannels[cid] || '(unknown)'}</span>`).join(multi ? ', ' : '')}
+            <span class="channel-dropdown-arrow">&#9662;</span>
+        </div>
+        <div class="channel-dropdown-list" style="display:none;">
+            ${Object.entries(allChannels).map(([cid, name]) => `
+                <div class="channel-dropdown-item${selectedArr.includes(cid) ? ' selected' : ''}" data-cid="${cid}">${name}</div>
+            `).join('')}
+        </div>
+    </div>`;
+    setTimeout(() => {
+        const box = document.getElementById(dropdownId);
+        if (!box) return;
+        const selectedDiv = box.querySelector('.channel-dropdown-selected');
+        const listDiv = box.querySelector('.channel-dropdown-list');
+        selectedDiv.onclick = () => {
+            listDiv.style.display = listDiv.style.display === 'block' ? 'none' : 'block';
+        };
+        box.onblur = () => { listDiv.style.display = 'none'; };
+        listDiv.querySelectorAll('.channel-dropdown-item').forEach(item => {
+            item.onclick = (e) => {
+                e.stopPropagation();
+                if (multi) {
+                    if (item.classList.contains('selected')) {
+                        item.classList.remove('selected');
+                    } else {
+                        item.classList.add('selected');
+                    }
+                    const selectedCids = Array.from(listDiv.querySelectorAll('.channel-dropdown-item.selected')).map(i => i.getAttribute('data-cid'));
+                    if (onChange) onChange(selectedCids);
+                    selectedDiv.innerHTML = selectedCids.map(cid => `<span class="channel-pill">${allChannels[cid] || '(unknown)'}</span>`).join(', ') + '<span class="channel-dropdown-arrow">&#9662;</span>';
+                } else {
+                    listDiv.querySelectorAll('.channel-dropdown-item').forEach(i => i.classList.remove('selected'));
+                    item.classList.add('selected');
+                    if (onChange) onChange(item.getAttribute('data-cid'));
+                    selectedDiv.innerHTML = `<span class="channel-pill">${allChannels[item.getAttribute('data-cid')] || '(unknown)'}</span><span class="channel-dropdown-arrow">&#9662;</span>`;
+                    listDiv.style.display = 'none';
+                }
+            };
+        });
+    }, 0);
+    return html;
+}
+
 function renderModerationSection(data) {
     const modDiv = document.getElementById('moderation-setup');
     let html = `<div class="dashboard-card">
         <span class="dashboard-label">Moderation Setup:</span> <span class="badge ${data.moderation_setup ? 'enabled' : 'disabled'}">${data.moderation_setup ? 'Enabled' : 'Disabled'}</span>
     </div>`;
-    // Moderation roles/commands
     if (data.moderation_roles && Object.keys(data.moderation_roles).length > 0) {
         html += `<div class="dashboard-card"><span class="dashboard-label">Role Permissions:</span><table><tr><th>Role</th><th>Allowed Commands</th></tr>`;
         for (const [roleId, cmds] of Object.entries(data.moderation_roles)) {
@@ -40,7 +87,6 @@ function renderModerationSection(data) {
         }
         html += `</table></div>`;
     }
-    // Warnings
     if (data.warnings && data.warnings.length > 0) {
         html += `<button class="collapsible">Show Warnings (${data.warnings.length})</button><div class="collapsible-content"><table><tr><th>User</th><th>Moderator</th><th>Reason</th><th>Date</th><th>ID</th></tr>`;
         for (const w of data.warnings) {
@@ -60,12 +106,11 @@ function renderTicketSection(data) {
         return;
     }
     let html = `<div class="dashboard-card" style="margin-bottom:2rem; padding-bottom:1.2rem;">
-        <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Panel Channel:</span> <span class="dashboard-value">${channelNames[data.ticket_settings.channel_id] || ''}</span></div>
-        <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Log Channel:</span> <span class="dashboard-value">${channelNames[data.ticket_settings.log_channel_id] || ''}</span></div>
+        <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Panel Channel:</span> ${createChannelDropdown(data.ticket_settings.channel_id, channelNames)}</div>
+        <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Log Channel:</span> ${createChannelDropdown(data.ticket_settings.log_channel_id, channelNames)}</div>
         <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Rules:</span> <span class="dashboard-value">${escapeHTML(data.ticket_settings.rules_text || '')}</span></div>
         <div><span class="dashboard-label">Ticket Message:</span> <span class="dashboard-value">${escapeHTML(data.ticket_settings.ticket_msg || '')}</span></div>
     </div>`;
-    // Categories
     if (data.ticket_categories && data.ticket_categories.length > 0) {
         html += `<div class="dashboard-card" style="margin-bottom:2rem;"><span class="dashboard-label">Categories:</span><ul class="dashboard-list" style="margin-top:0.7rem; margin-bottom:0.7rem;">`;
         for (const cat of data.ticket_categories) {
@@ -73,7 +118,6 @@ function renderTicketSection(data) {
         }
         html += `</ul></div>`;
     }
-    // Category roles
     if (data.ticket_category_roles && Object.keys(data.ticket_category_roles).length > 0) {
         html += `<div class="dashboard-card" style="margin-bottom:2rem;"><span class="dashboard-label">Category Roles:</span><table style="margin-top:0.7rem;"><tr><th>Category</th><th>Roles</th></tr>`;
         for (const [cat, roles] of Object.entries(data.ticket_category_roles)) {
@@ -92,11 +136,11 @@ function renderLoggingSection(data) {
         return;
     }
     let html = `<div class="dashboard-card" style="margin-bottom:2rem; padding-bottom:1.2rem;">
-        <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Log Channel:</span> <span class="dashboard-value">${channelNames[data.log_settings.log_channel_id] || ''}</span></div>
+        <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Log Channel:</span> ${createChannelDropdown(data.log_settings.log_channel_id, channelNames)}</div>
         <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Mode:</span> <span class="dashboard-value">${escapeHTML(data.log_settings.mode)}</span></div>
         <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Events:</span> <span class="dashboard-value">${data.log_settings.events.map(e => `<span class='badge enabled'>${escapeHTML(e)}</span>`).join(' ')}</span></div>`;
     if (data.log_settings.selected_channels && data.log_settings.selected_channels.length > 0) {
-        html += `<div><span class="dashboard-label">Selected Channels:</span> <span class="dashboard-value">${data.log_settings.selected_channels.map(c => channelNames[c] || '').join(', ')}</span></div>`;
+        html += `<div><span class="dashboard-label">Selected Channels:</span> ${createChannelDropdown(data.log_settings.selected_channels, channelNames, true)}</div>`;
     }
     html += `</div>`;
     logDiv.innerHTML = html;
@@ -133,7 +177,6 @@ function renderLevelingSection(data) {
         return out;
     }
     function updateLeaderboard(page) {
-        // Always use the latest leaderboard and userNames from the global data
         leaderboardData = data.leaderboard ? [...data.leaderboard] : [];
         userNamesData = { ...userNames };
         levelDiv.innerHTML = html + renderLeaderboardPage(page);
@@ -157,7 +200,7 @@ function renderLevelingSection(data) {
     if (data.leveling_settings) {
         html += `<div class="dashboard-card" style="margin-bottom:2rem; padding-bottom:1.2rem;">
             <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Level Up Message:</span> <span class="dashboard-value">${escapeHTML(data.leveling_settings.levelup_message || '')}</span></div>
-            <div><span class="dashboard-label">Channel:</span> <span class="dashboard-value">${channelNames[data.leveling_settings.channel_id] || ''}</span></div>
+            <div><span class="dashboard-label">Channel:</span> ${createChannelDropdown(data.leveling_settings.channel_id, channelNames)}</div>
         </div>`;
     } else {
         html += `<div class="dashboard-card">Leveling not configured.</div>`;
@@ -180,7 +223,6 @@ function showSection(section) {
             page.classList.remove('active');
         }
     });
-    // Animate section fade-in
     setTimeout(() => {
         const active = document.querySelector('.dashboard-page.active');
         if (active) {
@@ -190,7 +232,6 @@ function showSection(section) {
     }, 10);
 }
 
-// Sidebar navigation logic
 const sidebar = document.querySelector('.dashboard-nav');
 const sidebarToggle = document.getElementById('sidebar-toggle');
 const navLinks = document.querySelectorAll('.dashboard-nav a[data-page]');
@@ -217,7 +258,6 @@ sidebarToggle.addEventListener('click', () => {
     }
 });
 
-// Close sidebar on nav click (mobile)
 navLinks.forEach(link => {
     link.addEventListener('click', e => {
         e.preventDefault();
@@ -229,15 +269,12 @@ navLinks.forEach(link => {
             closeSidebar();
         }
     });
-    // Add smooth highlight for active link
     link.addEventListener('mouseenter', () => link.classList.add('hovered'));
     link.addEventListener('mouseleave', () => link.classList.remove('hovered'));
 });
 
-// On load, show only the overview section
 showSection('overview');
 
-// Example: Set guild name (replace with actual data fetch)
 document.getElementById('guild-name').textContent = 'Your Server Name';
 
 if (guildId) {
@@ -249,11 +286,9 @@ if (guildId) {
         })
         .then(data => {
             hideLoadingSpinner();
-            // --- Collect role, user, and channel names if available ---
             if (data.role_names) roleNames = data.role_names;
             if (data.user_names) userNames = data.user_names;
             if (data.channel_names) channelNames = data.channel_names;
-            // Guild Info
             const guildInfoDiv = document.getElementById('guild-info');
             guildInfoDiv.innerHTML = `<div class="dashboard-card">
                 <span class="dashboard-label">Guild ID:</span> <span class="dashboard-value" data-id="${escapeHTML(String(data.guild_info.id))}">${escapeHTML(String(data.guild_info.id))}</span>
@@ -263,7 +298,6 @@ if (guildId) {
             renderTicketSection(data);
             renderLoggingSection(data);
             renderLevelingSection(data);
-            // Collapsible logic for warnings
             document.querySelectorAll('.collapsible').forEach(btn => {
                 btn.onclick = function() {
                     this.classList.toggle("active");
@@ -281,7 +315,6 @@ if (guildId) {
     document.getElementById('dashboard-root').innerText = 'No guild selected.';
 }
 
-// --- Tooltip for IDs on hover ---
 document.addEventListener('mouseover', function(e) {
     if (e.target && e.target.classList.contains('dashboard-value') && e.target.dataset.id) {
         let tooltip = document.getElementById('dashboard-tooltip');
