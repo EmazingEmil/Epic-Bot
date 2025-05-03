@@ -11,7 +11,7 @@ let userNames = {};
 let channelNames = {};
 
 // --- Moderation Commands List (should match backend) ---
-const ALL_MOD_COMMANDS = [
+let ALL_MOD_COMMANDS = [
     "ban", "kick", "mute", "unmute", "warn", "clearwarns", "purge", "timeout", "untimeout"
 ];
 
@@ -708,6 +708,10 @@ if (guildId) {
             if (data.role_names) roleNames = data.role_names;
             if (data.user_names) userNames = data.user_names;
             if (data.channel_names) channelNames = data.channel_names;
+            // Use backend-provided list if available
+            if (data.all_mod_commands && Array.isArray(data.all_mod_commands)) {
+                ALL_MOD_COMMANDS = data.all_mod_commands;
+            }
             const guildInfoDiv = document.getElementById('guild-info');
             guildInfoDiv.innerHTML = `<div class="dashboard-card">
                 <span class="dashboard-label">Guild ID:</span> <span class="dashboard-value" data-id="${escapeHTML(String(data.guild_info.id))}">${escapeHTML(String(data.guild_info.id))}</span>
