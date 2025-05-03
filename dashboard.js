@@ -93,7 +93,7 @@ function createRoleDropdown(selected, allRoles, exclude = [], id = '', onChange 
         </div>
         <div class="role-dropdown-list" style="display:none;">
             ${Object.entries(allRoles).map(([rid, name]) =>
-                exclude.includes(rid) ? '' : `<div class="role-dropdown-item${selected === rid ? ' selected' : ''}" data-rid="${rid}">${name}</div>`
+                exclude.includes(rid) ? '' : `<div class="role-dropdown-item${selected === rid ? ' selected' : ''}" data-rid="${rid}" data-dropdown-id="${dropdownId}">${name}</div>`
             ).join('')}
         </div>
     </div>`;
@@ -127,17 +127,6 @@ function createRoleDropdown(selected, allRoles, exclude = [], id = '', onChange 
         box.onblur = () => { listDiv.style.display = 'none'; };
         window.addEventListener('scroll', () => { if (listDiv.style.display === 'block') positionDropdown(); }, true);
         window.addEventListener('resize', () => { if (listDiv.style.display === 'block') positionDropdown(); });
-        listDiv.querySelectorAll('.role-dropdown-item').forEach(item => {
-            item.onclick = (e) => {
-                e.stopPropagation();
-                if (item.classList.contains('selected')) return;
-                listDiv.querySelectorAll('.role-dropdown-item').forEach(i => i.classList.remove('selected'));
-                item.classList.add('selected');
-                selectedDiv.innerHTML = `<span class="role-pill">${allRoles[item.getAttribute('data-rid')] || '(unknown)'}</span><span class="role-dropdown-arrow">&#9662;</span>`;
-                listDiv.style.display = 'none';
-                if (onChange) onChange(item.getAttribute('data-rid'));
-            };
-        });
         document.addEventListener('mousedown', function handler(e) {
             if (!box.contains(e.target) && !listDiv.contains(e.target)) {
                 listDiv.style.display = 'none';
@@ -440,28 +429,6 @@ function renderModerationSection(data) {
     // Delegated event handling for all dropdowns in the moderation table
     const table = document.getElementById('mod-roles-table');
     table.onclick = function(e) {
-        // Role dropdown item
-        if (e.target.classList.contains('role-dropdown-item')) {
-            const item = e.target;
-            if (item.classList.contains('selected')) return;
-            const tr = item.closest('tr');
-            if (!tr) return;
-            const newRoleId = item.getAttribute('data-rid');
-            if (!newRoleId) return;
-            if (table.querySelector(`tr[data-role-id="${newRoleId}"]`)) return;
-            tr.setAttribute('data-role-id', newRoleId);
-            tr.id = `mod-role-row-${newRoleId}`;
-            const btn = tr.querySelector('.mod-role-remove-btn');
-            if (btn) btn.setAttribute('data-role-id', newRoleId);
-            const dropdown = tr.querySelector('.role-dropdown-box');
-            if (dropdown) dropdown.id = `role-dropdown-${newRoleId}`;
-            // Re-render the dropdown cell to update exclude list
-            const cell = dropdown.parentElement;
-            if (cell) {
-                cell.innerHTML = createRoleDropdown(newRoleId, roleNames, Object.keys(collectModerationRoles()), `role-dropdown-${newRoleId}`);
-            }
-            showApplyBar();
-        }
         // Command dropdown item
         if (e.target.classList.contains('command-dropdown-item')) {
             e.target.classList.toggle('selected');
@@ -542,6 +509,57 @@ function renderModerationSection(data) {
 
     setTimeout(setupDropdownChangeDetection, 0);
 }
+
+// --- GLOBAL event listener for role dropdowns (portaled lists) ---
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('role-dropdown-item')) {
+        const item = e.target;
+        if (item.classList.contains('selected')) return;
+        const dropdownId = item.getAttribute('data-dropdown-id');
+        const box = document.getElementById(dropdownId);
+        if (!box) return;
+        // Find the table row (tr) containing this dropdown box
+        let tr = box.closest('tr');
+        if (!tr) {
+            // If not in a tr, check if it's the add row
+            tr = document.getElementById('mod-role-add-row');
+        }
+        if (!tr) return;
+        const newRoleId = item.getAttribute('data-rid');
+        if (!newRoleId) return;
+        // Prevent duplicate role in table
+        const table = document.getElementById('mod-roles-table');
+        if (table && table.querySelector(`tr[data-role-id="${newRoleId}"]`)) return;
+        // Update row's data-role-id and id if not add row
+        if (tr.id !== 'mod-role-add-row') {
+            tr.setAttribute('data-role-id', newRoleId);
+            tr.id = `mod-role-row-${newRoleId}`;
+            const btn = tr.querySelector('.mod-role-remove-btn');
+            if (btn) btn.setAttribute('data-role-id', newRoleId);
+            const dropdown = tr.querySelector('.role-dropdown-box');
+            if (dropdown) dropdown.id = `role-dropdown-${newRoleId}`;
+            // Re-render the dropdown cell to update exclude list
+            const cell = dropdown.parentElement;
+            if (cell) {
+                cell.innerHTML = createRoleDropdown(newRoleId, roleNames, Object.keys(collectModerationRoles()), `role-dropdown-${newRoleId}`);
+            }
+            showApplyBar();
+        } else {
+            // For add row: visually select the item
+            const listDiv = box.querySelector('.role-dropdown-list');
+            if (listDiv) {
+                listDiv.querySelectorAll('.role-dropdown-item').forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+            }
+            const sel = box.querySelector('.role-dropdown-selected');
+            if (sel) sel.innerHTML = `<span class="role-pill">${roleNames[newRoleId] || '(unknown)'}</span><span class="role-dropdown-arrow">&#9662;</span>`;
+            showApplyBar();
+        }
+        // Hide the dropdown list
+        const listDiv = box._roleDropdownList;
+        if (listDiv) listDiv.style.display = 'none';
+    }
+});
 
 function renderTicketSection(data) {
     const ticketDiv = document.getElementById('ticket-system');
