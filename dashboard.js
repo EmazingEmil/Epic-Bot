@@ -60,8 +60,8 @@ function renderTicketSection(data) {
         return;
     }
     let html = `<div class="dashboard-card">
-        <span class="dashboard-label">Panel Channel:</span> <span class="dashboard-value">${channelNames[data.ticket_settings.channel_id] || escapeHTML(String(data.ticket_settings.channel_id))}</span><br>
-        <span class="dashboard-label">Log Channel:</span> <span class="dashboard-value">${channelNames[data.ticket_settings.log_channel_id] || escapeHTML(String(data.ticket_settings.log_channel_id))}</span><br>
+        <span class="dashboard-label">Panel Channel:</span> <span class="dashboard-value">${channelNames[data.ticket_settings.channel_id] || ''}</span><br>
+        <span class="dashboard-label">Log Channel:</span> <span class="dashboard-value">${channelNames[data.ticket_settings.log_channel_id] || ''}</span><br>
         <span class="dashboard-label">Rules:</span> <span class="dashboard-value">${escapeHTML(data.ticket_settings.rules_text || '')}</span><br>
         <span class="dashboard-label">Ticket Message:</span> <span class="dashboard-value">${escapeHTML(data.ticket_settings.ticket_msg || '')}</span>
     </div>`;
@@ -91,11 +91,13 @@ function renderLoggingSection(data) {
         return;
     }
     let html = `<div class="dashboard-card">
-        <span class="dashboard-label">Log Channel:</span> <span class="dashboard-value">${channelNames[data.log_settings.log_channel_id] || escapeHTML(String(data.log_settings.log_channel_id))}</span><br>
+        <span class="dashboard-label">Log Channel:</span> <span class="dashboard-value">${channelNames[data.log_settings.log_channel_id] || ''}</span><br>
         <span class="dashboard-label">Mode:</span> <span class="dashboard-value">${escapeHTML(data.log_settings.mode)}</span><br>
-        <span class="dashboard-label">Events:</span> <span class="dashboard-value">${data.log_settings.events.map(e => `<span class='badge enabled'>${escapeHTML(e)}</span>`).join(' ')}</span><br>
-        <span class="dashboard-label">Selected Channels:</span> <span class="dashboard-value">${data.log_settings.selected_channels && data.log_settings.selected_channels.length > 0 ? data.log_settings.selected_channels.map(c => channelNames[c] || escapeHTML(String(c))).join(', ') : 'All'}</span>
-    </div>`;
+        <span class="dashboard-label">Events:</span> <span class="dashboard-value">${data.log_settings.events.map(e => `<span class='badge enabled'>${escapeHTML(e)}</span>`).join(' ')}</span><br>`;
+    if (data.log_settings.selected_channels && data.log_settings.selected_channels.length > 0) {
+        html += `<span class="dashboard-label">Selected Channels:</span> <span class="dashboard-value">${data.log_settings.selected_channels.map(c => channelNames[c] || '').join(', ')}</span>`;
+    }
+    html += `</div>`;
     logDiv.innerHTML = html;
 }
 
@@ -105,7 +107,7 @@ function renderLevelingSection(data) {
     if (data.leveling_settings) {
         html += `<div class="dashboard-card">
             <span class="dashboard-label">Level Up Message:</span> <span class="dashboard-value">${escapeHTML(data.leveling_settings.levelup_message || '')}</span><br>
-            <span class="dashboard-label">Channel:</span> <span class="dashboard-value">${channelNames[data.leveling_settings.channel_id] || escapeHTML(String(data.leveling_settings.channel_id))}</span>
+            <span class="dashboard-label">Channel:</span> <span class="dashboard-value">${channelNames[data.leveling_settings.channel_id] || ''}</span>
         </div>`;
     } else {
         html += `<div class="dashboard-card">Leveling not configured.</div>`;
@@ -122,7 +124,7 @@ function renderLevelingSection(data) {
     if (data.leaderboard && data.leaderboard.length > 0) {
         html += `<div class="dashboard-card"><span class="dashboard-label">Leaderboard:</span><table><tr><th>#</th><th>User</th><th>Level</th><th>XP</th></tr>`;
         data.leaderboard.forEach((u, i) => {
-            const userName = userNames[u.user_id] || u.user_id;
+            const userName = userNames[u.user_id] || '';
             html += `<tr><td>${i+1}</td><td>${escapeHTML(String(userName))}</td><td>${u.level}</td><td>${u.xp}</td></tr>`;
         });
         html += `</table></div>`;
