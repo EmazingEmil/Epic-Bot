@@ -525,6 +525,17 @@ td {
     white-space: normal;
 }
 
+/* Style the select element to look like the other dropdowns */
+.role-select.styled-select {
+    appearance: none; /* Remove default arrow */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%237f5af0'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 1em;
+    padding-right: 2rem;
+    cursor: pointer;
+}
+
 /* Moderation Command Dropdown Styles */
 .command-dropdown-box {
     display: inline-block;
