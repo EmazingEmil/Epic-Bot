@@ -336,7 +336,7 @@ function renderModerationSection(data) {
         const exclude = usedRoleIds.filter(rid => rid !== roleId);
         html += `<tr data-role-id="${roleId}" id="${rowId}">
             <td>
-                <select class="role-select" data-role-id="${roleId}">
+                <select class="role-select styled-select" data-role-id="${roleId}">
                     <option value="">Select a role</option>
                     ${Object.entries(roleNames).map(([rid, name]) =>
                         exclude.includes(rid) ? '' : `<option value="${rid}" ${roleId === rid ? 'selected' : ''}>${name}</option>`
@@ -354,7 +354,7 @@ function renderModerationSection(data) {
     // Add new role row
     html += `<tr id="mod-role-add-row">
         <td>
-            <select class="role-select" id="mod-role-add-select">
+            <select class="role-select styled-select" id="mod-role-add-select">
                 <option value="">Select a role</option>
                 ${Object.entries(roleNames).map(([rid, name]) =>
                     usedRoleIds.includes(rid) ? '' : `<option value="${rid}">${name}</option>`
