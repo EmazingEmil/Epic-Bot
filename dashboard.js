@@ -29,28 +29,23 @@ function hideLoadingSpinner() {
 function createChannelDropdown(selected, allChannels, multi = false, onChange = null) {
     const selectedArr = Array.isArray(selected) ? selected : [selected];
     const dropdownId = 'dropdown-' + Math.random().toString(36).slice(2);
-    // Function to calculate width based on selected channel names
-    function calcWidth(selectedArr) {
-        let baseWidth = 140;
-        let maxWidth = 900;
-        let minWidth = baseWidth;
-        let totalLen = 0;
-        if (multi && selectedArr.length > 0) {
-            totalLen = selectedArr.reduce((acc, cid) => acc + ((allChannels[cid] || '').length), 0);
-            minWidth = Math.min(Math.max(baseWidth, 32 + selectedArr.length * 18 + totalLen * 9 + (selectedArr.length-1)*10), maxWidth);
-        } else if (!multi && selectedArr.length === 1) {
-            minWidth = Math.min(Math.max(baseWidth, 32 + (allChannels[selectedArr[0]] || '').length * 11), maxWidth);
-        }
-        return minWidth;
+    // Set a max width for the dropdown; allow wrapping if too many channels
+    const maxWidth = 520;
+    const minWidth = 140;
+    // Calculate width based on selected channel names, but cap at maxWidth
+    let totalLen = 0;
+    if (multi && selectedArr.length > 0) {
+        totalLen = selectedArr.reduce((acc, cid) => acc + ((allChannels[cid] || '').length), 0);
+    } else if (!multi && selectedArr.length === 1) {
+        totalLen = (allChannels[selectedArr[0]] || '').length;
     }
-    let width = calcWidth(selectedArr);
-    let maxWidth = 900;
-    let html = `<div class="channel-dropdown-box" tabindex="0" id="${dropdownId}" style="width:${width}px;min-width:${width}px;max-width:${maxWidth}px;">
-        <div class="channel-dropdown-selected" style="width:${width-10}px;max-width:${maxWidth-10}px;">
+    let width = Math.min(Math.max(minWidth, 32 + selectedArr.length * 18 + totalLen * 9 + (selectedArr.length-1)*10), maxWidth);
+    let html = `<div class="channel-dropdown-box" tabindex="0" id="${dropdownId}" style="width:${width}px;min-width:${minWidth}px;max-width:${maxWidth}px;">
+        <div class="channel-dropdown-selected channel-dropdown-wrap" style="width:${width-10}px;max-width:${maxWidth-10}px;">
             ${selectedArr.map(cid => `<span class="channel-pill">${allChannels[cid] || '(unknown)'}</span>`).join(multi ? ', ' : '')}
             <span class="channel-dropdown-arrow">&#9662;</span>
         </div>
-        <div class="channel-dropdown-list" style="display:none;width:${width}px;min-width:${width}px;max-width:${maxWidth}px;">
+        <div class="channel-dropdown-list" style="display:none;width:${width}px;min-width:${minWidth}px;max-width:${maxWidth}px;">
             ${Object.entries(allChannels).map(([cid, name]) => `
                 <div class="channel-dropdown-item${selectedArr.includes(cid) ? ' selected' : ''}" data-cid="${cid}">${name}</div>
             `).join('')}
@@ -62,12 +57,21 @@ function createChannelDropdown(selected, allChannels, multi = false, onChange = 
         const selectedDiv = box.querySelector('.channel-dropdown-selected');
         const listDiv = box.querySelector('.channel-dropdown-list');
         function updateDropdownWidth(newSelectedArr) {
-            const newWidth = calcWidth(newSelectedArr);
+            let totalLen = 0;
+            if (multi && newSelectedArr.length > 0) {
+                totalLen = newSelectedArr.reduce((acc, cid) => acc + ((allChannels[cid] || '').length), 0);
+            } else if (!multi && newSelectedArr.length === 1) {
+                totalLen = (allChannels[newSelectedArr[0]] || '').length;
+            }
+            let newWidth = Math.min(Math.max(minWidth, 32 + newSelectedArr.length * 18 + totalLen * 9 + (newSelectedArr.length-1)*10), maxWidth);
             box.style.width = newWidth + 'px';
-            box.style.minWidth = newWidth + 'px';
+            box.style.minWidth = minWidth + 'px';
+            box.style.maxWidth = maxWidth + 'px';
             selectedDiv.style.width = (newWidth-10) + 'px';
+            selectedDiv.style.maxWidth = (maxWidth-10) + 'px';
             listDiv.style.width = newWidth + 'px';
-            listDiv.style.minWidth = newWidth + 'px';
+            listDiv.style.minWidth = minWidth + 'px';
+            listDiv.style.maxWidth = maxWidth + 'px';
         }
         selectedDiv.onclick = () => {
             listDiv.style.display = listDiv.style.display === 'block' ? 'none' : 'block';
