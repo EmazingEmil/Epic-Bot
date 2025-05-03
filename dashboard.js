@@ -5,9 +5,10 @@ function escapeHTML(str) {
     return str.replace(/[&<>'"]/g, tag => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[tag]));
 }
 
-// --- Role/User name mapping for display ---
+// --- Role/User/Channel name mapping for display ---
 let roleNames = {};
 let userNames = {};
+let channelNames = {};
 
 function renderModerationSection(data) {
     const modDiv = document.getElementById('moderation-setup');
@@ -43,8 +44,8 @@ function renderTicketSection(data) {
         return;
     }
     let html = `<div class="dashboard-card">
-        <span class="dashboard-label">Panel Channel:</span> <span class="dashboard-value">${roleNames[data.ticket_settings.channel_id] || escapeHTML(String(data.ticket_settings.channel_id))}</span><br>
-        <span class="dashboard-label">Log Channel:</span> <span class="dashboard-value">${roleNames[data.ticket_settings.log_channel_id] || escapeHTML(String(data.ticket_settings.log_channel_id))}</span><br>
+        <span class="dashboard-label">Panel Channel:</span> <span class="dashboard-value">${channelNames[data.ticket_settings.channel_id] || escapeHTML(String(data.ticket_settings.channel_id))}</span><br>
+        <span class="dashboard-label">Log Channel:</span> <span class="dashboard-value">${channelNames[data.ticket_settings.log_channel_id] || escapeHTML(String(data.ticket_settings.log_channel_id))}</span><br>
         <span class="dashboard-label">Rules:</span> <span class="dashboard-value">${escapeHTML(data.ticket_settings.rules_text || '')}</span><br>
         <span class="dashboard-label">Ticket Message:</span> <span class="dashboard-value">${escapeHTML(data.ticket_settings.ticket_msg || '')}</span>
     </div>`;
@@ -74,10 +75,10 @@ function renderLoggingSection(data) {
         return;
     }
     let html = `<div class="dashboard-card">
-        <span class="dashboard-label">Log Channel:</span> <span class="dashboard-value">${roleNames[data.log_settings.log_channel_id] || escapeHTML(String(data.log_settings.log_channel_id))}</span><br>
+        <span class="dashboard-label">Log Channel:</span> <span class="dashboard-value">${channelNames[data.log_settings.log_channel_id] || escapeHTML(String(data.log_settings.log_channel_id))}</span><br>
         <span class="dashboard-label">Mode:</span> <span class="dashboard-value">${escapeHTML(data.log_settings.mode)}</span><br>
         <span class="dashboard-label">Events:</span> <span class="dashboard-value">${data.log_settings.events.map(e => `<span class='badge enabled'>${escapeHTML(e)}</span>`).join(' ')}</span><br>
-        <span class="dashboard-label">Selected Channels:</span> <span class="dashboard-value">${data.log_settings.selected_channels && data.log_settings.selected_channels.length > 0 ? data.log_settings.selected_channels.map(c => roleNames[c] ? `${roleNames[c]} (${c})` : escapeHTML(String(c))).join(', ') : 'All'}</span>
+        <span class="dashboard-label">Selected Channels:</span> <span class="dashboard-value">${data.log_settings.selected_channels && data.log_settings.selected_channels.length > 0 ? data.log_settings.selected_channels.map(c => channelNames[c] ? `${channelNames[c]} (${c})` : escapeHTML(String(c))).join(', ') : 'All'}</span>
     </div>`;
     logDiv.innerHTML = html;
 }
@@ -88,7 +89,7 @@ function renderLevelingSection(data) {
     if (data.leveling_settings) {
         html += `<div class="dashboard-card">
             <span class="dashboard-label">Level Up Message:</span> <span class="dashboard-value">${escapeHTML(data.leveling_settings.levelup_message || '')}</span><br>
-            <span class="dashboard-label">Channel:</span> <span class="dashboard-value">${roleNames[data.leveling_settings.channel_id] || escapeHTML(String(data.leveling_settings.channel_id))}</span>
+            <span class="dashboard-label">Channel:</span> <span class="dashboard-value">${channelNames[data.leveling_settings.channel_id] || escapeHTML(String(data.leveling_settings.channel_id))}</span>
         </div>`;
     } else {
         html += `<div class="dashboard-card">Leveling not configured.</div>`;
@@ -113,6 +114,16 @@ function renderLevelingSection(data) {
         html += `<div class="dashboard-card">No leaderboard data.</div>`;
     }
     levelDiv.innerHTML = html;
+}
+
+function showSection(section) {
+    document.querySelectorAll('.dashboard-page').forEach(page => {
+        if (page.id === `page-${section}`) {
+            page.style.display = '';
+        } else {
+            page.style.display = 'none';
+        }
+    });
 }
 
 // Sidebar navigation logic
@@ -149,18 +160,15 @@ navLinks.forEach(link => {
         navLinks.forEach(l => l.classList.remove('active'));
         link.classList.add('active');
         const page = link.getAttribute('data-page');
-        pages.forEach(sec => {
-            if (sec.id === `page-${page}`) {
-                sec.classList.add('active');
-            } else {
-                sec.classList.remove('active');
-            }
-        });
+        showSection(page);
         if (window.innerWidth <= 900) {
             closeSidebar();
         }
     });
 });
+
+// On load, show only the overview section
+showSection('overview');
 
 // Example: Set guild name (replace with actual data fetch)
 document.getElementById('guild-name').textContent = 'Your Server Name';
@@ -172,9 +180,10 @@ if (guildId) {
             return res.json();
         })
         .then(data => {
-            // --- Collect role and user names if available ---
+            // --- Collect role, user, and channel names if available ---
             if (data.role_names) roleNames = data.role_names;
             if (data.user_names) userNames = data.user_names;
+            if (data.channel_names) channelNames = data.channel_names;
             // Guild Info
             const guildInfoDiv = document.getElementById('guild-info');
             guildInfoDiv.innerHTML = `<div class="dashboard-card">
