@@ -534,15 +534,22 @@ document.addEventListener('click', function(e) {
         if (tr.id !== 'mod-role-add-row') {
             tr.setAttribute('data-role-id', newRoleId);
             tr.id = `mod-role-row-${newRoleId}`;
+            // Only update the dropdown cell, not the whole row
+            const dropdownCell = tr.querySelector('td');
+            if (dropdownCell) {
+                dropdownCell.innerHTML = createRoleDropdown(
+                    newRoleId,
+                    roleNames,
+                    Object.keys(collectModerationRoles()),
+                    `role-dropdown-${newRoleId}`
+                );
+            }
+            // Update the remove button's data-role-id
             const btn = tr.querySelector('.mod-role-remove-btn');
             if (btn) btn.setAttribute('data-role-id', newRoleId);
+            // Update the dropdown box id
             const dropdown = tr.querySelector('.role-dropdown-box');
             if (dropdown) dropdown.id = `role-dropdown-${newRoleId}`;
-            // Re-render the dropdown cell to update exclude list
-            const cell = dropdown.parentElement;
-            if (cell) {
-                cell.innerHTML = createRoleDropdown(newRoleId, roleNames, Object.keys(collectModerationRoles()), `role-dropdown-${newRoleId}`);
-            }
             showApplyBar();
         } else {
             // For add row: visually select the item
