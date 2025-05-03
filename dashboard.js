@@ -158,21 +158,22 @@ function showApplyBarLoading() {
 }
 
 function setupDropdownChangeDetection() {
-    // Save initial state
     originalDropdownState = getDropdownState();
-    // Listen for changes
-    document.querySelectorAll('.channel-dropdown-list').forEach(listDiv => {
-        listDiv.addEventListener('click', e => {
-            if (e.target.classList.contains('channel-dropdown-item')) {
-                // After a short delay (to allow UI update), check for changes
-                setTimeout(() => {
-                    pendingDropdownState = getDropdownState();
-                    if (JSON.stringify(pendingDropdownState) !== JSON.stringify(originalDropdownState)) {
-                        showApplyBar();
-                    }
-                }, 100);
+    // Remove any previous observers
+    if (window._dropdownObservers) {
+        window._dropdownObservers.forEach(obs => obs.disconnect());
+    }
+    window._dropdownObservers = [];
+    // Attach a MutationObserver to each dropdown's selected area
+    document.querySelectorAll('.channel-dropdown-selected').forEach(selectedDiv => {
+        const observer = new MutationObserver(() => {
+            pendingDropdownState = getDropdownState();
+            if (JSON.stringify(pendingDropdownState) !== JSON.stringify(originalDropdownState)) {
+                showApplyBar();
             }
         });
+        observer.observe(selectedDiv, { childList: true, subtree: true });
+        window._dropdownObservers.push(observer);
     });
 }
 
