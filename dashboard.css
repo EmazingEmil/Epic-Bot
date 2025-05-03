@@ -420,6 +420,12 @@ td {
     text-overflow: unset;
     white-space: normal;
 }
+.channel-dropdown-item.selected {
+    background: #2a2a38;
+    color: #888;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
 .channel-pill {
     display: inline-block;
     background: var(--primary);
