@@ -107,22 +107,24 @@ function renderLevelingSection(data) {
     let html = '';
     let currentPage = 0;
     const perPage = 10;
+    let leaderboardData = data.leaderboard ? [...data.leaderboard] : [];
+    let userNamesData = { ...userNames };
+
     function renderLeaderboardPage(page) {
         let out = '';
-        if (data.leaderboard && data.leaderboard.length > 0) {
+        if (leaderboardData && leaderboardData.length > 0) {
             const start = page * perPage;
             const end = start + perPage;
-            const pageData = data.leaderboard.slice(start, end);
+            const pageData = leaderboardData.slice(start, end);
             out += `<div class="dashboard-card" style="margin-bottom:2rem;"><span class="dashboard-label">Leaderboard:</span><table style="margin-top:0.7rem;"><tr><th>#</th><th>User</th><th>Level</th><th>XP</th></tr>`;
             pageData.forEach((u, i) => {
-                const userName = userNames[u.user_id] || '';
+                const userName = userNamesData[u.user_id] || u.user_id || '';
                 out += `<tr><td>${start + i + 1}</td><td>${escapeHTML(String(userName))}</td><td>${u.level}</td><td>${u.xp}</td></tr>`;
             });
             out += `</table>`;
-            // Pagination buttons
             out += `<div style="display:flex;justify-content:center;gap:1.5rem;margin-top:1.2rem;">
                 <button type="button" id="leaderboard-prev" class="btn glass-btn" ${page === 0 ? 'disabled' : ''}>&#8592;</button>
-                <button type="button" id="leaderboard-next" class="btn glass-btn" ${(end >= data.leaderboard.length) ? 'disabled' : ''}>&#8594;</button>
+                <button type="button" id="leaderboard-next" class="btn glass-btn" ${(end >= leaderboardData.length) ? 'disabled' : ''}>&#8594;</button>
             </div>`;
             out += `</div>`;
         } else {
@@ -131,8 +133,10 @@ function renderLevelingSection(data) {
         return out;
     }
     function updateLeaderboard(page) {
+        // Always use the latest leaderboard and userNames from the global data
+        leaderboardData = data.leaderboard ? [...data.leaderboard] : [];
+        userNamesData = { ...userNames };
         levelDiv.innerHTML = html + renderLeaderboardPage(page);
-        // Use setTimeout to ensure DOM is updated before adding event listeners
         setTimeout(() => {
             const prevBtn = document.getElementById('leaderboard-prev');
             const nextBtn = document.getElementById('leaderboard-next');
@@ -143,7 +147,7 @@ function renderLevelingSection(data) {
                 }
             };
             if (nextBtn) nextBtn.onclick = () => {
-                if ((currentPage + 1) * perPage < data.leaderboard.length) {
+                if ((currentPage + 1) * perPage < leaderboardData.length) {
                     currentPage++;
                     updateLeaderboard(currentPage);
                 }
@@ -158,7 +162,6 @@ function renderLevelingSection(data) {
     } else {
         html += `<div class="dashboard-card">Leveling not configured.</div>`;
     }
-    // Level roles
     if (data.level_roles && Object.keys(data.level_roles).length > 0) {
         html += `<div class="dashboard-card" style="margin-bottom:2rem;"><span class="dashboard-label">Level Roles:</span><table style="margin-top:0.7rem;"><tr><th>Level</th><th>Role</th></tr>`;
         for (const [lvl, roleId] of Object.entries(data.level_roles)) {
