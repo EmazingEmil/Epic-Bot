@@ -393,17 +393,25 @@ function renderModerationSection(data) {
     let html = `<div class="dashboard-card">
         <span class="dashboard-label">Moderation Setup:</span> <span class="badge ${data.moderation_setup ? 'enabled' : 'disabled'}">${data.moderation_setup ? 'Enabled' : 'Disabled'}</span>
     </div>`;
-    // Editable moderation roles
     html += `<div class="dashboard-card" id="mod-roles-edit"><span class="dashboard-label">Role Permissions:</span>
         <table id="mod-roles-table"><tr><th>Role</th><th>Allowed Commands</th><th>Actions</th></tr>`;
     // Existing roles
     const usedRoleIds = Object.keys(data.moderation_roles || {});
     for (const [roleId, cmds] of Object.entries(data.moderation_roles || {})) {
         const rowId = `mod-role-row-${roleId}`;
+        // Exclude all used roles except the current one
+        const exclude = usedRoleIds.filter(rid => rid !== roleId);
         html += `<tr data-role-id="${roleId}" id="${rowId}">
             <td>
-                ${createRoleDropdown(roleId, roleNames, usedRoleIds.filter(rid => rid !== roleId), `role-dropdown-${roleId}`, function() {
-                    showApplyBar(); // Always show apply bar on role change
+                ${createRoleDropdown(roleId, roleNames, exclude, `role-dropdown-${roleId}`, function(newRoleId) {
+                    // Handler for role change
+                    const tr = document.getElementById(`mod-role-row-${roleId}`);
+                    if (!tr) return;
+                    // Prevent duplicate roles
+                    if (document.querySelector(`#mod-roles-table tr[data-role-id="${newRoleId}"]`)) return;
+                    tr.setAttribute('data-role-id', newRoleId);
+                    tr.id = `mod-role-row-${newRoleId}`;
+                    showApplyBar();
                 })}
             </td>
             <td>
@@ -417,9 +425,7 @@ function renderModerationSection(data) {
     // Add new role row
     html += `<tr id="mod-role-add-row">
         <td>
-            ${createRoleDropdown('', roleNames, usedRoleIds, 'mod-role-add-select', function() {
-                showApplyBar();
-            })}
+            ${createRoleDropdown('', roleNames, usedRoleIds, 'mod-role-add-select', function() { showApplyBar(); })}
         </td>
         <td>
             ${createCommandDropdown([], ALL_MOD_COMMANDS, 'mod-role-add-cmds')}
