@@ -59,25 +59,26 @@ function renderTicketSection(data) {
         ticketDiv.innerHTML = `<div class="dashboard-card">Ticket system not set up.</div>`;
         return;
     }
-    let html = `<div class="dashboard-card">
-        <span class="dashboard-label">Panel Channel:</span> <span class="dashboard-value">${channelNames[data.ticket_settings.channel_id] || ''}</span><br>
-        <span class="dashboard-label">Log Channel:</span> <span class="dashboard-value">${channelNames[data.ticket_settings.log_channel_id] || ''}</span><br>
-        <span class="dashboard-label">Rules:</span> <span class="dashboard-value">${escapeHTML(data.ticket_settings.rules_text || '')}</span><br>
-        <span class="dashboard-label">Ticket Message:</span> <span class="dashboard-value">${escapeHTML(data.ticket_settings.ticket_msg || '')}</span>
+    let html = `<div class="dashboard-card" style="margin-bottom:2rem; padding-bottom:1.2rem;">
+        <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Panel Channel:</span> <span class="dashboard-value">${channelNames[data.ticket_settings.channel_id] || ''}</span></div>
+        <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Log Channel:</span> <span class="dashboard-value">${channelNames[data.ticket_settings.log_channel_id] || ''}</span></div>
+        <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Rules:</span> <span class="dashboard-value">${escapeHTML(data.ticket_settings.rules_text || '')}</span></div>
+        <div><span class="dashboard-label">Ticket Message:</span> <span class="dashboard-value">${escapeHTML(data.ticket_settings.ticket_msg || '')}</span></div>
     </div>`;
     // Categories
     if (data.ticket_categories && data.ticket_categories.length > 0) {
-        html += `<div class="dashboard-card"><span class="dashboard-label">Categories:</span><ul class="dashboard-list">`;
+        html += `<div class="dashboard-card" style="margin-bottom:2rem;"><span class="dashboard-label">Categories:</span><ul class="dashboard-list" style="margin-top:0.7rem; margin-bottom:0.7rem;">`;
         for (const cat of data.ticket_categories) {
-            html += `<li><b>${escapeHTML(cat.name)}</b>: ${escapeHTML(cat.description)}${cat.ping_on_create ? ' <span class="badge warn">Ping on create</span>' : ''}</li>`;
+            html += `<li style="margin-bottom:0.5rem;"><b>${escapeHTML(cat.name)}</b>: ${escapeHTML(cat.description)}${cat.ping_on_create ? ' <span class="badge warn">Ping on create</span>' : ''}</li>`;
         }
         html += `</ul></div>`;
     }
     // Category roles
     if (data.ticket_category_roles && Object.keys(data.ticket_category_roles).length > 0) {
-        html += `<div class="dashboard-card"><span class="dashboard-label">Category Roles:</span><table><tr><th>Category</th><th>Roles</th></tr>`;
+        html += `<div class="dashboard-card" style="margin-bottom:2rem;"><span class="dashboard-label">Category Roles:</span><table style="margin-top:0.7rem;"><tr><th>Category</th><th>Roles</th></tr>`;
         for (const [cat, roles] of Object.entries(data.ticket_category_roles)) {
-            html += `<tr><td>${escapeHTML(cat)}</td><td>${roles.map(r => roleNames[r] || escapeHTML(String(r))).join(', ')}</td></tr>`;
+            const roleNamesList = roles.map(r => roleNames[r] || '').filter(Boolean).join(', ');
+            html += `<tr><td>${escapeHTML(cat)}</td><td>${roleNamesList || '<span style=\'color:#888\'>(none)</span>'}</td></tr>`;
         }
         html += `</table></div>`;
     }
@@ -90,12 +91,12 @@ function renderLoggingSection(data) {
         logDiv.innerHTML = `<div class="dashboard-card">Logging not set up.</div>`;
         return;
     }
-    let html = `<div class="dashboard-card">
-        <span class="dashboard-label">Log Channel:</span> <span class="dashboard-value">${channelNames[data.log_settings.log_channel_id] || ''}</span><br>
-        <span class="dashboard-label">Mode:</span> <span class="dashboard-value">${escapeHTML(data.log_settings.mode)}</span><br>
-        <span class="dashboard-label">Events:</span> <span class="dashboard-value">${data.log_settings.events.map(e => `<span class='badge enabled'>${escapeHTML(e)}</span>`).join(' ')}</span><br>`;
+    let html = `<div class="dashboard-card" style="margin-bottom:2rem; padding-bottom:1.2rem;">
+        <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Log Channel:</span> <span class="dashboard-value">${channelNames[data.log_settings.log_channel_id] || ''}</span></div>
+        <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Mode:</span> <span class="dashboard-value">${escapeHTML(data.log_settings.mode)}</span></div>
+        <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Events:</span> <span class="dashboard-value">${data.log_settings.events.map(e => `<span class='badge enabled'>${escapeHTML(e)}</span>`).join(' ')}</span></div>`;
     if (data.log_settings.selected_channels && data.log_settings.selected_channels.length > 0) {
-        html += `<span class="dashboard-label">Selected Channels:</span> <span class="dashboard-value">${data.log_settings.selected_channels.map(c => channelNames[c] || '').join(', ')}</span>`;
+        html += `<div><span class="dashboard-label">Selected Channels:</span> <span class="dashboard-value">${data.log_settings.selected_channels.map(c => channelNames[c] || '').join(', ')}</span></div>`;
     }
     html += `</div>`;
     logDiv.innerHTML = html;
@@ -105,16 +106,16 @@ function renderLevelingSection(data) {
     const levelDiv = document.getElementById('leveling-section');
     let html = '';
     if (data.leveling_settings) {
-        html += `<div class="dashboard-card">
-            <span class="dashboard-label">Level Up Message:</span> <span class="dashboard-value">${escapeHTML(data.leveling_settings.levelup_message || '')}</span><br>
-            <span class="dashboard-label">Channel:</span> <span class="dashboard-value">${channelNames[data.leveling_settings.channel_id] || ''}</span>
+        html += `<div class="dashboard-card" style="margin-bottom:2rem; padding-bottom:1.2rem;">
+            <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Level Up Message:</span> <span class="dashboard-value">${escapeHTML(data.leveling_settings.levelup_message || '')}</span></div>
+            <div><span class="dashboard-label">Channel:</span> <span class="dashboard-value">${channelNames[data.leveling_settings.channel_id] || ''}</span></div>
         </div>`;
     } else {
         html += `<div class="dashboard-card">Leveling not configured.</div>`;
     }
     // Level roles
     if (data.level_roles && Object.keys(data.level_roles).length > 0) {
-        html += `<div class="dashboard-card"><span class="dashboard-label">Level Roles:</span><table><tr><th>Level</th><th>Role</th></tr>`;
+        html += `<div class="dashboard-card" style="margin-bottom:2rem;"><span class="dashboard-label">Level Roles:</span><table style="margin-top:0.7rem;"><tr><th>Level</th><th>Role</th></tr>`;
         for (const [lvl, roleId] of Object.entries(data.level_roles)) {
             html += `<tr><td>${escapeHTML(lvl)}</td><td>${roleNames[roleId] || escapeHTML(String(roleId))}</td></tr>`;
         }
@@ -122,7 +123,7 @@ function renderLevelingSection(data) {
     }
     // Leaderboard
     if (data.leaderboard && data.leaderboard.length > 0) {
-        html += `<div class="dashboard-card"><span class="dashboard-label">Leaderboard:</span><table><tr><th>#</th><th>User</th><th>Level</th><th>XP</th></tr>`;
+        html += `<div class="dashboard-card" style="margin-bottom:2rem;"><span class="dashboard-label">Leaderboard:</span><table style="margin-top:0.7rem;"><tr><th>#</th><th>User</th><th>Level</th><th>XP</th></tr>`;
         data.leaderboard.forEach((u, i) => {
             const userName = userNames[u.user_id] || '';
             html += `<tr><td>${i+1}</td><td>${escapeHTML(String(userName))}</td><td>${u.level}</td><td>${u.xp}</td></tr>`;
