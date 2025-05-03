@@ -78,6 +78,122 @@ function createChannelDropdown(selected, allChannels, multi = false, onChange = 
     return html;
 }
 
+// --- Apply Changes Bar Logic ---
+let originalDropdownState = {};
+let pendingDropdownState = {};
+let applyBarVisible = false;
+
+function getDropdownState() {
+    // Collect current dropdown selections by dropdown id
+    const dropdowns = document.querySelectorAll('.channel-dropdown-box');
+    const state = {};
+    dropdowns.forEach(drop => {
+        const selected = Array.from(drop.querySelectorAll('.channel-pill')).map(e => e.textContent);
+        state[drop.id] = selected;
+    });
+    return state;
+}
+
+function setDropdownState(state) {
+    // For each dropdown, set its selected channels
+    Object.entries(state).forEach(([id, selectedArr]) => {
+        const drop = document.getElementById(id);
+        if (!drop) return;
+        const selectedDiv = drop.querySelector('.channel-dropdown-selected');
+        if (selectedDiv) {
+            selectedDiv.innerHTML = selectedArr.map(name => `<span class="channel-pill">${name}</span>`).join('') + '<span class="channel-dropdown-arrow">&#9662;</span>';
+        }
+        // Also update the dropdown list items
+        const listDiv = drop.querySelector('.channel-dropdown-list');
+        if (listDiv) {
+            listDiv.querySelectorAll('.channel-dropdown-item').forEach(item => {
+                if (selectedArr.includes(item.textContent)) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        }
+    });
+}
+
+function showApplyBar() {
+    if (applyBarVisible) return;
+    document.getElementById('apply-changes-bar').style.display = 'flex';
+    document.getElementById('apply-changes-bar').className = 'apply-changes-bar';
+    document.getElementById('apply-changes-message').style.display = '';
+    document.getElementById('apply-changes-loading').style.display = 'none';
+    document.getElementById('apply-changes-apply').style.display = '';
+    document.getElementById('apply-changes-cancel').style.display = '';
+    applyBarVisible = true;
+}
+function hideApplyBar() {
+    document.getElementById('apply-changes-bar').style.display = 'none';
+    applyBarVisible = false;
+}
+function showApplyBarSuccess(msg) {
+    const bar = document.getElementById('apply-changes-bar');
+    bar.className = 'apply-changes-bar success';
+    document.getElementById('apply-changes-message').textContent = msg;
+    document.getElementById('apply-changes-message').style.display = '';
+    document.getElementById('apply-changes-loading').style.display = 'none';
+    document.getElementById('apply-changes-apply').style.display = 'none';
+    document.getElementById('apply-changes-cancel').style.display = 'none';
+    setTimeout(hideApplyBar, 3000);
+}
+function showApplyBarError(msg) {
+    const bar = document.getElementById('apply-changes-bar');
+    bar.className = 'apply-changes-bar error';
+    document.getElementById('apply-changes-message').textContent = msg;
+    document.getElementById('apply-changes-message').style.display = '';
+    document.getElementById('apply-changes-loading').style.display = 'none';
+    document.getElementById('apply-changes-apply').style.display = '';
+    document.getElementById('apply-changes-cancel').style.display = '';
+}
+function showApplyBarLoading() {
+    document.getElementById('apply-changes-message').style.display = 'none';
+    document.getElementById('apply-changes-loading').style.display = '';
+    document.getElementById('apply-changes-apply').style.display = 'none';
+    document.getElementById('apply-changes-cancel').style.display = 'none';
+}
+
+function setupDropdownChangeDetection() {
+    // Save initial state
+    originalDropdownState = getDropdownState();
+    // Listen for changes
+    document.querySelectorAll('.channel-dropdown-list').forEach(listDiv => {
+        listDiv.addEventListener('click', e => {
+            if (e.target.classList.contains('channel-dropdown-item')) {
+                // After a short delay (to allow UI update), check for changes
+                setTimeout(() => {
+                    pendingDropdownState = getDropdownState();
+                    if (JSON.stringify(pendingDropdownState) !== JSON.stringify(originalDropdownState)) {
+                        showApplyBar();
+                    }
+                }, 100);
+            }
+        });
+    });
+}
+
+function resetDropdownsToOriginal() {
+    setDropdownState(originalDropdownState);
+    hideApplyBar();
+}
+
+function applyDropdownChanges() {
+    showApplyBarLoading();
+    // Example: send PATCH to backend (adjust endpoint/data as needed)
+    // Here, you need to map dropdown state to channel IDs, not just names
+    // For demo, just simulate success
+    setTimeout(() => {
+        // Simulate success
+        originalDropdownState = JSON.parse(JSON.stringify(pendingDropdownState));
+        showApplyBarSuccess('Changes saved successfully!');
+    }, 1500);
+    // On error, call showApplyBarError('Failed to save: ...')
+}
+
 function renderModerationSection(data) {
     const modDiv = document.getElementById('moderation-setup');
     let html = `<div class="dashboard-card">
@@ -340,4 +456,10 @@ document.addEventListener('mouseout', function(e) {
         const tooltip = document.getElementById('dashboard-tooltip');
         if (tooltip) tooltip.style.display = 'none';
     }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(setupDropdownChangeDetection, 1000);
+    document.getElementById('apply-changes-cancel').onclick = resetDropdownsToOriginal;
+    document.getElementById('apply-changes-apply').onclick = applyDropdownChanges;
 });
