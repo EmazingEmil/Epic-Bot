@@ -21,7 +21,7 @@ function renderModerationSection(data) {
             const roleName = roleNames[roleId] ? `${roleNames[roleId]} (${roleId})` : roleId;
             html += `<tr><td>${escapeHTML(roleName)}</td><td>${cmds.map(c => `<span class='badge enabled'>${escapeHTML(c)}</span>`).join(' ')}</td></tr>`;
         }
-        html += `</table></div>`;q
+        html += `</table></div>`;
     }
     // Warnings
     if (data.warnings && data.warnings.length > 0) {
