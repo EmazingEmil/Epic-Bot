@@ -9,46 +9,48 @@
     <link rel="icon" type="image/png" href="Epic Bot.png">
 </head>
 <body style="background: var(--bg); color: var(--text); font-family: 'Montserrat', sans-serif;">
-    <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar">☰</button>
-    <nav class="dashboard-nav glass">
-        <div class="logo dashboard-logo">
-            <img src="Epic Bot.png" alt="Epic Bot Logo" class="dashboard-logo-img"> Epic Bot
-        </div>
-        <ul id="dashboard-menu">
-            <li><a href="#overview" class="active nav-link" data-page="overview"><span class="icon">🏠</span>Overview</a></li>
-            <li><a href="#moderation" class="nav-link" data-page="moderation"><span class="icon">🛡️</span>Moderation</a></li>
-            <li><a href="#tickets" class="nav-link" data-page="tickets"><span class="icon">🎫</span>Tickets</a></li>
-            <li><a href="#logging" class="nav-link" data-page="logging"><span class="icon">📜</span>Logging</a></li>
-            <li><a href="#leveling" class="nav-link" data-page="leveling"><span class="icon">🏆</span>Leveling</a></li>
-        </ul>
-        <div class="nav-footer">&copy; 2025 Epic Bot</div>
-    </nav>
-    <main class="dashboard-main centered-content">
-        <div class="dashboard-title gradient-text" style="margin-bottom:1.2rem;">Epic Bot Dashboard</div>
-        <div class="dashboard-guild" id="guild-name"></div>
-        <div id="dashboard-root">
-            <section class="dashboard-page active glass" id="page-overview" style="margin-bottom:2rem;">
-                <div class="dashboard-section-title"><span>Guild Overview</span></div>
-                <div id="guild-info"></div>
-            </section>
-            <section class="dashboard-page glass" id="page-moderation" style="margin-bottom:2rem;">
-                <div class="dashboard-section-title"><span>Moderation</span> <button class="dashboard-btn" id="mod-settings-btn">Settings</button></div>
-                <div id="moderation-setup"></div>
-            </section>
-            <section class="dashboard-page glass" id="page-tickets" style="margin-bottom:2rem;">
-                <div class="dashboard-section-title"><span>Ticket System</span> <button class="dashboard-btn" id="ticket-settings-btn">Settings</button></div>
-                <div id="ticket-system"></div>
-            </section>
-            <section class="dashboard-page glass" id="page-logging" style="margin-bottom:2rem;">
-                <div class="dashboard-section-title"><span>Logging</span> <button class="dashboard-btn" id="log-settings-btn">Settings</button></div>
-                <div id="logging-section"></div>
-            </section>
-            <section class="dashboard-page glass" id="page-leveling" style="margin-bottom:2rem;">
-                <div class="dashboard-section-title"><span>Leveling</span> <button class="dashboard-btn" id="level-settings-btn">Settings</button></div>
-                <div id="leveling-section"></div>
-            </section>
-        </div>
-    </main>
+    <div class="dashboard-container">
+        <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar">☰</button>
+        <nav class="dashboard-nav glass">
+            <div class="logo dashboard-logo">
+                <img src="Epic Bot.png" alt="Epic Bot Logo" class="dashboard-logo-img"> Epic Bot
+            </div>
+            <ul id="dashboard-menu">
+                <li><a href="#overview" class="active nav-link" data-page="overview"><span class="icon">🏠</span>Overview</a></li>
+                <li><a href="#moderation" class="nav-link" data-page="moderation"><span class="icon">🛡️</span>Moderation</a></li>
+                <li><a href="#tickets" class="nav-link" data-page="tickets"><span class="icon">🎫</span>Tickets</a></li>
+                <li><a href="#logging" class="nav-link" data-page="logging"><span class="icon">📜</span>Logging</a></li>
+                <li><a href="#leveling" class="nav-link" data-page="leveling"><span class="icon">🏆</span>Leveling</a></li>
+            </ul>
+            <div class="nav-footer">&copy; 2025 Epic Bot</div>
+        </nav>
+        <main class="dashboard-main centered-content">
+            <div class="dashboard-title gradient-text" style="margin-bottom:1.2rem;">Epic Bot Dashboard</div>
+            <div class="dashboard-guild" id="guild-name"></div>
+            <div id="dashboard-root">
+                <section class="dashboard-page active glass" id="page-overview" style="margin-bottom:2rem;">
+                    <div class="dashboard-section-title"><span>Guild Overview</span></div>
+                    <div id="guild-info"></div>
+                </section>
+                <section class="dashboard-page glass" id="page-moderation" style="margin-bottom:2rem;">
+                    <div class="dashboard-section-title"><span>Moderation</span> <button class="dashboard-btn" id="mod-settings-btn">Settings</button></div>
+                    <div id="moderation-setup"></div>
+                </section>
+                <section class="dashboard-page glass" id="page-tickets" style="margin-bottom:2rem;">
+                    <div class="dashboard-section-title"><span>Ticket System</span> <button class="dashboard-btn" id="ticket-settings-btn">Settings</button></div>
+                    <div id="ticket-system"></div>
+                </section>
+                <section class="dashboard-page glass" id="page-logging" style="margin-bottom:2rem;">
+                    <div class="dashboard-section-title"><span>Logging</span> <button class="dashboard-btn" id="log-settings-btn">Settings</button></div>
+                    <div id="logging-section"></div>
+                </section>
+                <section class="dashboard-page glass" id="page-leveling" style="margin-bottom:2rem;">
+                    <div class="dashboard-section-title"><span>Leveling</span> <button class="dashboard-btn" id="level-settings-btn">Settings</button></div>
+                    <div id="leveling-section"></div>
+                </section>
+            </div>
+        </main>
+    </div>
     <script src="dashboard.js"></script>
 </body>
 </html>
