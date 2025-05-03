@@ -32,7 +32,6 @@ body {
     box-shadow: 0 4px 32px #7f5af033;
     transition: transform 0.3s cubic-bezier(.4,2,.6,1), width 0.3s;
     z-index: 20;
-    height: 100vh;
     position: sticky;
     top: 0;
     left: 0;
