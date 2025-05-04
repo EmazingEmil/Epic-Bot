@@ -394,10 +394,12 @@ function applyDropdownChanges() {
             showApplyBarSuccess('Changes saved successfully!');
         } else {
             showApplyBarError('Failed to save: ' + (data.error || 'Unknown error'));
+            console.error('PATCH error:', data);
         }
     })
     .catch(err => {
         showApplyBarError('Failed to save: ' + err);
+        console.error('PATCH error:', err);
     });
 }
 
@@ -578,18 +580,21 @@ function renderTicketSection(data) {
         <div id="ticket-categories-edit-list" style="margin-top:1rem;">
             ${categories.map((cat, idx) => {
                 const catId = `cat-${idx}`;
-                // --- Fix: Use cat.roles and cat.ping_roles if present, else fallback to ticket_category_roles ---
-                const rolesForCat = Array.isArray(cat.roles) ? cat.roles : (categoryRoles && categoryRoles[cat.name] ? categoryRoles[cat.name] : []);
-                // Always ensure roles are strings for comparison
-                const rolesForCatStr = rolesForCat.map(String);
-                // For ping_roles, use cat.ping_roles if present, else fallback to ping_on_create (legacy)
+                // Use cat.roles and cat.ping_roles if present, else fallback to ticket_category_roles
+                const rolesForCat = Array.isArray(cat.roles) ? cat.roles.map(String) : (categoryRoles && categoryRoles[cat.name] ? categoryRoles[cat.name].map(String) : []);
                 let pingRoles = [];
                 if (Array.isArray(cat.ping_roles)) {
                     pingRoles = cat.ping_roles.map(String);
-                } else if (cat.ping_on_create && rolesForCatStr.length > 0) {
-                    // Legacy: ping all allowed roles if ping_on_create is true
-                    pingRoles = [...rolesForCatStr];
+                } else if (cat.ping_on_create && rolesForCat.length > 0) {
+                    pingRoles = [...rolesForCat];
                 }
+                // Pills for selected roles
+                const allowedPills = rolesForCat.length
+                    ? `<div style="margin-bottom:0.3em;">${rolesForCat.map(rid => `<span class="role-pill">${escapeHTML(roleNames[rid] || rid)}</span>`).join(' ')}</div>`
+                    : '';
+                const pingPills = pingRoles.length
+                    ? `<div style="margin-bottom:0.3em;">${pingRoles.map(rid => `<span class="role-pill" style="background:#f5a524;">${escapeHTML(roleNames[rid] || rid)}</span>`).join(' ')}</div>`
+                    : '';
                 return `
                 <div class="ticket-category-edit" data-cat-idx="${idx}">
                     <label class="ticket-cat-label" for="${catId}-name">Title</label>
@@ -599,17 +604,19 @@ function renderTicketSection(data) {
                     <div class="ticket-cat-row">
                         <div>
                             <label class="ticket-cat-label" for="${catId}-roles">Allowed Roles:</label>
-                            <select class="ticket-cat-roles-select" id="${catId}-roles" multiple>
+                            ${allowedPills}
+                            <select class="ticket-cat-roles-select" id="${catId}-roles" multiple size="6">
                                 ${Object.entries(roleNames).map(([rid, rname]) =>
-                                    `<option value="${rid}"${rolesForCatStr.includes(rid) ? ' selected' : ''}>${escapeHTML(rname)}</option>`
+                                    `<option value="${rid}"${rolesForCat.includes(rid) ? ' selected' : ''}>${escapeHTML(rname)}</option>`
                                 ).join('')}
                             </select>
                         </div>
                         <div>
                             <label class="ticket-cat-label" for="${catId}-pingroles">Ping Roles:</label>
-                            <select class="ticket-cat-pingroles-select" id="${catId}-pingroles" multiple>
+                            ${pingPills}
+                            <select class="ticket-cat-pingroles-select" id="${catId}-pingroles" multiple size="6">
                                 ${Object.entries(roleNames).map(([rid, rname]) =>
-                                    `<option value="${rid}"${pingRoles.includes(rid) ? ' selected' : ''}${!rolesForCatStr.includes(rid) ? ' disabled' : ''}>${escapeHTML(rname)}</option>`
+                                    `<option value="${rid}"${pingRoles.includes(rid) ? ' selected' : ''}${!rolesForCat.includes(rid) ? ' disabled' : ''}>${escapeHTML(rname)}</option>`
                                 ).join('')}
                             </select>
                             <span style="color:#f5a524;font-size:0.97em;margin-left:0.3em;">(Only roles allowed above can be pinged)</span>
@@ -627,7 +634,7 @@ function renderTicketSection(data) {
             <div class="ticket-cat-row">
                 <div>
                     <label class="ticket-cat-label" for="new-cat-roles">Allowed Roles:</label>
-                    <select id="new-cat-roles" class="ticket-cat-roles-select" multiple>
+                    <select id="new-cat-roles" class="ticket-cat-roles-select" multiple size="6">
                         ${Object.entries(roleNames).map(([rid, rname]) =>
                             `<option value="${rid}">${escapeHTML(rname)}</option>`
                         ).join('')}
@@ -635,7 +642,7 @@ function renderTicketSection(data) {
                 </div>
                 <div>
                     <label class="ticket-cat-label" for="new-cat-pingroles">Ping Roles:</label>
-                    <select id="new-cat-pingroles" class="ticket-cat-pingroles-select" multiple>
+                    <select id="new-cat-pingroles" class="ticket-cat-pingroles-select" multiple size="6">
                         ${Object.entries(roleNames).map(([rid, rname]) =>
                             `<option value="${rid}">${escapeHTML(rname)}</option>`
                         ).join('')}
@@ -656,100 +663,6 @@ function renderTicketSection(data) {
     ticketDiv.innerHTML = html;
     setTimeout(setupDropdownChangeDetection, 0);
 
-    // --- Rules Edit Logic ---
-    const editBtn = document.getElementById('edit-ticket-rules-btn');
-    const pre = document.getElementById('ticket-rules-pre');
-    const editWrap = document.getElementById('ticket-rules-edit-wrap');
-    const textarea = document.getElementById('ticket-rules-edit');
-    const saveBtn = document.getElementById('save-ticket-rules-btn');
-    const cancelBtn = document.getElementById('cancel-ticket-rules-btn');
-    let originalRules = data.ticket_settings.rules_text || '';
-
-    if (editBtn && pre && editWrap && textarea && saveBtn && cancelBtn) {
-        editBtn.onclick = () => {
-            pre.style.display = 'none';
-            editBtn.style.display = 'none';
-            editWrap.style.display = 'flex';
-            textarea.value = originalRules;
-            textarea.focus();
-            textarea.style.boxShadow = "0 0 0 2px #5865f2";
-        };
-        textarea.oninput = () => {
-            saveBtn.style.display = (textarea.value !== originalRules) ? '' : 'none';
-        };
-        saveBtn.onclick = () => {
-            const newRules = textarea.value;
-            if (newRules !== originalRules) {
-                pre.textContent = newRules;
-                originalRules = newRules;
-                pre.classList.add('dashboard-value');
-                pre.textContent = newRules;
-                showApplyBar();
-            }
-            pre.style.display = '';
-            editBtn.style.display = '';
-            editWrap.style.display = 'none';
-            saveBtn.style.display = 'none';
-            textarea.style.boxShadow = "";
-        };
-        cancelBtn.onclick = () => {
-            pre.style.display = '';
-            editBtn.style.display = '';
-            editWrap.style.display = 'none';
-            saveBtn.style.display = 'none';
-            textarea.value = originalRules;
-            textarea.style.boxShadow = "";
-        };
-        saveBtn.style.display = 'none';
-    }
-
-    // --- Ticket Message Edit Logic ---
-    const editMsgBtn = document.getElementById('edit-ticket-msg-btn');
-    const msgPre = document.getElementById('ticket-msg-pre');
-    const msgEditWrap = document.getElementById('ticket-msg-edit-wrap');
-    const msgTextarea = document.getElementById('ticket-msg-edit');
-    const msgSaveBtn = document.getElementById('save-ticket-msg-btn');
-    const msgCancelBtn = document.getElementById('cancel-ticket-msg-btn');
-    let originalMsg = data.ticket_settings.ticket_msg || '';
-
-    if (editMsgBtn && msgPre && msgEditWrap && msgTextarea && msgSaveBtn && msgCancelBtn) {
-        editMsgBtn.onclick = () => {
-            msgPre.style.display = 'none';
-            editMsgBtn.style.display = 'none';
-            msgEditWrap.style.display = 'flex';
-            msgTextarea.value = originalMsg;
-            msgTextarea.focus();
-            msgTextarea.style.boxShadow = "0 0 0 2px #5865f2";
-        };
-        msgTextarea.oninput = () => {
-            msgSaveBtn.style.display = (msgTextarea.value !== originalMsg) ? '' : 'none';
-        };
-        msgSaveBtn.onclick = () => {
-            const newMsg = msgTextarea.value;
-            if (newMsg !== originalMsg) {
-                msgPre.textContent = newMsg;
-                originalMsg = newMsg;
-                msgPre.classList.add('dashboard-value');
-                msgPre.textContent = newMsg;
-                showApplyBar();
-            }
-            msgPre.style.display = '';
-            editMsgBtn.style.display = '';
-            msgEditWrap.style.display = 'none';
-            msgSaveBtn.style.display = 'none';
-            msgTextarea.style.boxShadow = "";
-        };
-        msgCancelBtn.onclick = () => {
-            msgPre.style.display = '';
-            editMsgBtn.style.display = '';
-            msgEditWrap.style.display = 'none';
-            msgSaveBtn.style.display = 'none';
-            msgTextarea.value = originalMsg;
-            msgTextarea.style.boxShadow = "";
-        };
-        msgSaveBtn.style.display = 'none';
-    }
-
     // --- Attach change listeners for categories ---
     document.querySelectorAll('.ticket-cat-name-input, .ticket-cat-desc-input').forEach(input => {
         input.addEventListener('input', showApplyBar);
@@ -768,9 +681,7 @@ function renderTicketSection(data) {
             const roles = Array.from(document.getElementById('new-cat-roles').selectedOptions).map(o => o.value);
             const ping_roles = Array.from(document.getElementById('new-cat-pingroles').selectedOptions).map(o => o.value);
             if (!name) return;
-            // Add new category to the DOM
             categories.push({ name, description: desc, roles, ping_roles });
-            // Re-render section (will also trigger showApplyBar)
             renderTicketSection({
                 ...data,
                 ticket_categories: categories,
@@ -781,7 +692,6 @@ function renderTicketSection(data) {
             });
             showApplyBar();
         };
-        // Keep ping_roles in sync with allowed roles
         document.getElementById('new-cat-roles').addEventListener('change', function () {
             const allowed = Array.from(this.selectedOptions).map(o => o.value);
             Array.from(document.getElementById('new-cat-pingroles').options).forEach(opt => {
