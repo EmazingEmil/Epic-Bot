@@ -11,9 +11,7 @@ let userNames = {};
 let channelNames = {};
 
 // --- Moderation Commands List (should match backend) ---
-let ALL_MOD_COMMANDS = [
-    "ban", "kick", "mute", "unmute", "warn", "clearwarns", "purge", "timeout", "untimeout"
-];
+let ALL_MOD_COMMANDS = []; // Start empty, will be set by backend
 
 // --- Loading spinner ---
 function showLoadingSpinner() {
