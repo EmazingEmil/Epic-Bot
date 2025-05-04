@@ -578,31 +578,29 @@ function renderTicketSection(data) {
             const rolesForCat = (data.ticket_category_roles && data.ticket_category_roles[cat.name]) ? data.ticket_category_roles[cat.name] : [];
             const pingRoles = Array.isArray(cat.ping_roles) ? cat.ping_roles : [];
             catHtml += `
-            <div class="ticket-category-edit" data-cat-idx="${idx}" style="margin-bottom:1.5rem;padding:1.1rem 1.2rem;background:#23272a;border-radius:10px;border:1.5px solid #5865f2;">
-                <div style="display:flex;align-items:center;gap:0.7rem;">
-                    <input type="text" class="ticket-cat-name-input" id="${catId}-name" value="${escapeHTML(cat.name)}" style="font-size:1.1em;font-weight:600;background:#181b20;color:#fff;border:1.5px solid #5865f2;border-radius:7px;padding:0.3em 0.8em;width:180px;"/>
-                    <span style="color:#888;font-size:0.97em;">Title</span>
-                </div>
-                <div style="margin-top:0.7rem;">
-                    <textarea class="ticket-cat-desc-input" id="${catId}-desc" style="width:100%;min-height:48px;font-size:1em;background:#181b20;color:#fff;border:1.5px solid #5865f2;border-radius:7px;padding:0.5em 0.8em;">${escapeHTML(cat.description)}</textarea>
-                    <span style="color:#888;font-size:0.97em;">Description</span>
-                </div>
-                <div style="margin-top:0.7rem;">
-                    <span style="color:#fff;font-weight:500;">Allowed Roles:</span>
-                    <select class="ticket-cat-roles-select" id="${catId}-roles" multiple style="margin-left:0.7em;min-width:160px;max-width:340px;background:#181b20;color:#fff;border:1.5px solid #5865f2;border-radius:7px;padding:0.3em 0.8em;">
-                        ${Object.entries(roleNames).map(([rid, rname]) =>
-                            `<option value="${rid}"${rolesForCat.includes(rid) ? ' selected' : ''}>${escapeHTML(rname)}</option>`
-                        ).join('')}
-                    </select>
-                </div>
-                <div style="margin-top:0.7rem;">
-                    <span style="color:#fff;font-weight:500;">Ping Roles:</span>
-                    <select class="ticket-cat-pingroles-select" id="${catId}-pingroles" multiple style="margin-left:0.7em;min-width:160px;max-width:340px;background:#181b20;color:#fff;border:1.5px solid #f5a524;border-radius:7px;padding:0.3em 0.8em;">
-                        ${Object.entries(roleNames).map(([rid, rname]) =>
-                            `<option value="${rid}"${pingRoles.includes(rid) ? ' selected' : ''}${!rolesForCat.includes(rid) ? ' disabled' : ''}>${escapeHTML(rname)}</option>`
-                        ).join('')}
-                    </select>
-                    <span style="color:#f5a524;font-size:0.97em;margin-left:0.7em;">(Only roles allowed above can be pinged)</span>
+            <div class="ticket-category-edit" data-cat-idx="${idx}">
+                <label class="ticket-cat-label" for="${catId}-name">Title</label>
+                <input type="text" class="ticket-cat-name-input" id="${catId}-name" value="${escapeHTML(cat.name)}"/>
+                <label class="ticket-cat-label" for="${catId}-desc">Description</label>
+                <textarea class="ticket-cat-desc-input" id="${catId}-desc">${escapeHTML(cat.description)}</textarea>
+                <div class="ticket-cat-row">
+                    <div>
+                        <label class="ticket-cat-label" for="${catId}-roles">Allowed Roles:</label>
+                        <select class="ticket-cat-roles-select" id="${catId}-roles" multiple>
+                            ${Object.entries(roleNames).map(([rid, rname]) =>
+                                `<option value="${rid}"${rolesForCat.includes(rid) ? ' selected' : ''}>${escapeHTML(rname)}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="ticket-cat-label" for="${catId}-pingroles">Ping Roles:</label>
+                        <select class="ticket-cat-pingroles-select" id="${catId}-pingroles" multiple>
+                            ${Object.entries(roleNames).map(([rid, rname]) =>
+                                `<option value="${rid}"${pingRoles.includes(rid) ? ' selected' : ''}${!rolesForCat.includes(rid) ? ' disabled' : ''}>${escapeHTML(rname)}</option>`
+                            ).join('')}
+                        </select>
+                        <span style="color:#f5a524;font-size:0.97em;margin-left:0.3em;">(Only roles allowed above can be pinged)</span>
+                    </div>
                 </div>
             </div>`;
         });
