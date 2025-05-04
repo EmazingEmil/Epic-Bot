@@ -522,24 +522,30 @@ function renderTicketSection(data) {
     // --- Editable Rules Field ---
     let rulesHtml = `
         <div style="display:flex;align-items:flex-start;gap:0.7rem;">
-            <pre id="ticket-rules-pre" class="dashboard-value" style="white-space:pre-wrap;word-break:break-word;flex:1 1 auto;margin:0;min-width:0;border:1.5px solid #5865f2;border-radius:7px;padding:0.7em 1em;background:#23272a;">${escapeHTML(data.ticket_settings.rules_text || '')}</pre>
+            <pre id="ticket-rules-pre" class="dashboard-value" style="white-space:pre-wrap;word-break:break-word;flex:1 1 auto;margin:0;min-width:0;border:1.5px solid #5865f2;border-radius:7px;padding:0.7em 1em;background:#23272a;transition:box-shadow 0.2s, border 0.2s;">${escapeHTML(data.ticket_settings.rules_text || '')}</pre>
             <button id="edit-ticket-rules-btn" class="dashboard-btn" style="flex:0 0 auto;">Edit</button>
         </div>
         <div id="ticket-rules-edit-wrap" style="display:none;flex-direction:column;gap:0.5rem;">
-            <textarea id="ticket-rules-edit" style="width:100%;min-height:120px;font-family:inherit;font-size:1rem;resize:vertical;border:1.5px solid #5865f2;border-radius:7px;padding:0.7em 1em;background:#23272a;color:#fff;">${escapeHTML(data.ticket_settings.rules_text || '')}</textarea>
-            <button id="save-ticket-rules-btn" class="dashboard-btn" style="align-self:flex-end;">Save</button>
+            <textarea id="ticket-rules-edit" style="width:100%;min-height:120px;font-family:inherit;font-size:1rem;resize:vertical;border:2px solid #5865f2;border-radius:10px;padding:1em 1.2em;background:#181b20;color:#fff;box-shadow:0 2px 12px #5865f288;outline:none;transition:box-shadow 0.2s, border 0.2s;"></textarea>
+            <div style="display:flex;justify-content:flex-end;gap:0.7rem;">
+                <button id="save-ticket-rules-btn" class="dashboard-btn" style="background:#2cb67d;border-radius:7px;font-weight:600;box-shadow:0 2px 8px #2cb67d33;">Save</button>
+                <button id="cancel-ticket-rules-btn" class="dashboard-btn" style="background:#e05f5f;border-radius:7px;font-weight:600;box-shadow:0 2px 8px #e05f5f33;">Cancel</button>
+            </div>
         </div>
     `;
 
     // --- Editable Ticket Message Field ---
     let ticketMsgHtml = `
         <div style="display:flex;align-items:flex-start;gap:0.7rem;">
-            <pre id="ticket-msg-pre" class="dashboard-value" style="white-space:pre-wrap;word-break:break-word;flex:1 1 auto;margin:0;min-width:0;border:1.5px solid #5865f2;border-radius:7px;padding:0.7em 1em;background:#23272a;">${escapeHTML(data.ticket_settings.ticket_msg || '')}</pre>
+            <pre id="ticket-msg-pre" class="dashboard-value" style="white-space:pre-wrap;word-break:break-word;flex:1 1 auto;margin:0;min-width:0;border:1.5px solid #5865f2;border-radius:7px;padding:0.7em 1em;background:#23272a;transition:box-shadow 0.2s, border 0.2s;">${escapeHTML(data.ticket_settings.ticket_msg || '')}</pre>
             <button id="edit-ticket-msg-btn" class="dashboard-btn" style="flex:0 0 auto;">Edit</button>
         </div>
         <div id="ticket-msg-edit-wrap" style="display:none;flex-direction:column;gap:0.5rem;">
-            <textarea id="ticket-msg-edit" style="width:100%;min-height:80px;font-family:inherit;font-size:1rem;resize:vertical;border:1.5px solid #5865f2;border-radius:7px;padding:0.7em 1em;background:#23272a;color:#fff;">${escapeHTML(data.ticket_settings.ticket_msg || '')}</textarea>
-            <button id="save-ticket-msg-btn" class="dashboard-btn" style="align-self:flex-end;">Save</button>
+            <textarea id="ticket-msg-edit" style="width:100%;min-height:80px;font-family:inherit;font-size:1rem;resize:vertical;border:2px solid #5865f2;border-radius:10px;padding:1em 1.2em;background:#181b20;color:#fff;box-shadow:0 2px 12px #5865f288;outline:none;transition:box-shadow 0.2s, border 0.2s;"></textarea>
+            <div style="display:flex;justify-content:flex-end;gap:0.7rem;">
+                <button id="save-ticket-msg-btn" class="dashboard-btn" style="background:#2cb67d;border-radius:7px;font-weight:600;box-shadow:0 2px 8px #2cb67d33;">Save</button>
+                <button id="cancel-ticket-msg-btn" class="dashboard-btn" style="background:#e05f5f;border-radius:7px;font-weight:600;box-shadow:0 2px 8px #e05f5f33;">Cancel</button>
+            </div>
         </div>
     `;
 
@@ -573,15 +579,17 @@ function renderTicketSection(data) {
     const editWrap = document.getElementById('ticket-rules-edit-wrap');
     const textarea = document.getElementById('ticket-rules-edit');
     const saveBtn = document.getElementById('save-ticket-rules-btn');
+    const cancelBtn = document.getElementById('cancel-ticket-rules-btn');
     let originalRules = data.ticket_settings.rules_text || '';
 
-    if (editBtn && pre && editWrap && textarea && saveBtn) {
+    if (editBtn && pre && editWrap && textarea && saveBtn && cancelBtn) {
         editBtn.onclick = () => {
             pre.style.display = 'none';
             editBtn.style.display = 'none';
             editWrap.style.display = 'flex';
             textarea.value = originalRules;
             textarea.focus();
+            textarea.style.boxShadow = "0 0 0 2px #5865f2";
         };
         textarea.oninput = () => {
             saveBtn.style.display = (textarea.value !== originalRules) ? '' : 'none';
@@ -599,6 +607,15 @@ function renderTicketSection(data) {
             editBtn.style.display = '';
             editWrap.style.display = 'none';
             saveBtn.style.display = 'none';
+            textarea.style.boxShadow = "";
+        };
+        cancelBtn.onclick = () => {
+            pre.style.display = '';
+            editBtn.style.display = '';
+            editWrap.style.display = 'none';
+            saveBtn.style.display = 'none';
+            textarea.value = originalRules;
+            textarea.style.boxShadow = "";
         };
         saveBtn.style.display = 'none';
     }
@@ -609,15 +626,17 @@ function renderTicketSection(data) {
     const msgEditWrap = document.getElementById('ticket-msg-edit-wrap');
     const msgTextarea = document.getElementById('ticket-msg-edit');
     const msgSaveBtn = document.getElementById('save-ticket-msg-btn');
+    const msgCancelBtn = document.getElementById('cancel-ticket-msg-btn');
     let originalMsg = data.ticket_settings.ticket_msg || '';
 
-    if (editMsgBtn && msgPre && msgEditWrap && msgTextarea && msgSaveBtn) {
+    if (editMsgBtn && msgPre && msgEditWrap && msgTextarea && msgSaveBtn && msgCancelBtn) {
         editMsgBtn.onclick = () => {
             msgPre.style.display = 'none';
             editMsgBtn.style.display = 'none';
             msgEditWrap.style.display = 'flex';
             msgTextarea.value = originalMsg;
             msgTextarea.focus();
+            msgTextarea.style.boxShadow = "0 0 0 2px #5865f2";
         };
         msgTextarea.oninput = () => {
             msgSaveBtn.style.display = (msgTextarea.value !== originalMsg) ? '' : 'none';
@@ -635,6 +654,15 @@ function renderTicketSection(data) {
             editMsgBtn.style.display = '';
             msgEditWrap.style.display = 'none';
             msgSaveBtn.style.display = 'none';
+            msgTextarea.style.boxShadow = "";
+        };
+        msgCancelBtn.onclick = () => {
+            msgPre.style.display = '';
+            editMsgBtn.style.display = '';
+            msgEditWrap.style.display = 'none';
+            msgSaveBtn.style.display = 'none';
+            msgTextarea.value = originalMsg;
+            msgTextarea.style.boxShadow = "";
         };
         msgSaveBtn.style.display = 'none';
     }
