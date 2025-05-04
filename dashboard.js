@@ -302,6 +302,21 @@ function collectModerationRoles() {
     return roles;
 }
 
+function collectTicketCategories() {
+    // Returns [{name, description, roles: [roleId], ping_roles: [roleId]}]
+    const cats = [];
+    document.querySelectorAll('.ticket-category-edit').forEach(catDiv => {
+        const name = catDiv.querySelector('.ticket-cat-name-input').value.trim();
+        const desc = catDiv.querySelector('.ticket-cat-desc-input').value.trim();
+        const rolesSel = catDiv.querySelector('.ticket-cat-roles-select');
+        const pingSel = catDiv.querySelector('.ticket-cat-pingroles-select');
+        const roles = Array.from(rolesSel.selectedOptions).map(o => o.value);
+        const ping_roles = Array.from(pingSel.selectedOptions).map(o => o.value);
+        cats.push({ name, description: desc, roles, ping_roles });
+    });
+    return cats;
+}
+
 function applyDropdownChanges() {
     showApplyBarLoading();
     // Collect the current dropdown selections by dropdown id
@@ -364,6 +379,8 @@ function applyDropdownChanges() {
         const modRoles = collectModerationRoles();
         if (Object.keys(modRoles).length) updates.moderation_roles = modRoles;
     }
+    // Ticket categories
+    updates.ticket_categories = collectTicketCategories();
     // Send PATCH request
     fetch('https://epic-bot-backend-production.up.railway.app/api/update-guild-channels', {
         method: 'PATCH',
@@ -549,27 +566,56 @@ function renderTicketSection(data) {
         </div>
     `;
 
+    // --- Editable Categories Section ---
+    let catHtml = '';
+    if (data.ticket_categories && data.ticket_categories.length > 0) {
+        catHtml = `<div class="dashboard-card" style="margin-bottom:2rem;">
+            <span class="dashboard-label">Categories:</span>
+            <div id="ticket-categories-edit-list" style="margin-top:1rem;">`;
+
+        data.ticket_categories.forEach((cat, idx) => {
+            const catId = `cat-${idx}`;
+            const rolesForCat = (data.ticket_category_roles && data.ticket_category_roles[cat.name]) ? data.ticket_category_roles[cat.name] : [];
+            const pingRoles = Array.isArray(cat.ping_roles) ? cat.ping_roles : [];
+            catHtml += `
+            <div class="ticket-category-edit" data-cat-idx="${idx}" style="margin-bottom:1.5rem;padding:1.1rem 1.2rem;background:#23272a;border-radius:10px;border:1.5px solid #5865f2;">
+                <div style="display:flex;align-items:center;gap:0.7rem;">
+                    <input type="text" class="ticket-cat-name-input" id="${catId}-name" value="${escapeHTML(cat.name)}" style="font-size:1.1em;font-weight:600;background:#181b20;color:#fff;border:1.5px solid #5865f2;border-radius:7px;padding:0.3em 0.8em;width:180px;"/>
+                    <span style="color:#888;font-size:0.97em;">Title</span>
+                </div>
+                <div style="margin-top:0.7rem;">
+                    <textarea class="ticket-cat-desc-input" id="${catId}-desc" style="width:100%;min-height:48px;font-size:1em;background:#181b20;color:#fff;border:1.5px solid #5865f2;border-radius:7px;padding:0.5em 0.8em;">${escapeHTML(cat.description)}</textarea>
+                    <span style="color:#888;font-size:0.97em;">Description</span>
+                </div>
+                <div style="margin-top:0.7rem;">
+                    <span style="color:#fff;font-weight:500;">Allowed Roles:</span>
+                    <select class="ticket-cat-roles-select" id="${catId}-roles" multiple style="margin-left:0.7em;min-width:160px;max-width:340px;background:#181b20;color:#fff;border:1.5px solid #5865f2;border-radius:7px;padding:0.3em 0.8em;">
+                        ${Object.entries(roleNames).map(([rid, rname]) =>
+                            `<option value="${rid}"${rolesForCat.includes(rid) ? ' selected' : ''}>${escapeHTML(rname)}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                <div style="margin-top:0.7rem;">
+                    <span style="color:#fff;font-weight:500;">Ping Roles:</span>
+                    <select class="ticket-cat-pingroles-select" id="${catId}-pingroles" multiple style="margin-left:0.7em;min-width:160px;max-width:340px;background:#181b20;color:#fff;border:1.5px solid #f5a524;border-radius:7px;padding:0.3em 0.8em;">
+                        ${Object.entries(roleNames).map(([rid, rname]) =>
+                            `<option value="${rid}"${pingRoles.includes(rid) ? ' selected' : ''}${!rolesForCat.includes(rid) ? ' disabled' : ''}>${escapeHTML(rname)}</option>`
+                        ).join('')}
+                    </select>
+                    <span style="color:#f5a524;font-size:0.97em;margin-left:0.7em;">(Only roles allowed above can be pinged)</span>
+                </div>
+            </div>`;
+        });
+
+        catHtml += `</div></div>`;
+    }
+
     let html = `<div class="dashboard-card" style="margin-bottom:2rem; padding-bottom:1.2rem;">
         <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Panel Channel:</span> ${createChannelDropdown(data.ticket_settings.channel_id, channelNames)}</div>
         <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Log Channel:</span> <span class="ticket-log-dropdown">${createChannelDropdown(data.ticket_settings.log_channel_id, channelNames)}</span></div>
         <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Rules:</span> <span style="flex:1 1 auto;min-width:0;display:block;">${rulesHtml}</span></div>
         <div><span class="dashboard-label">Ticket Message:</span> <span style="flex:1 1 auto;min-width:0;display:block;">${ticketMsgHtml}</span></div>
-    </div>`;
-    if (data.ticket_categories && data.ticket_categories.length > 0) {
-        html += `<div class="dashboard-card" style="margin-bottom:2rem;"><span class="dashboard-label">Categories:</span><ul class="dashboard-list" style="margin-top:0.7rem; margin-bottom:0.7rem;">`;
-        for (const cat of data.ticket_categories) {
-            html += `<li style="margin-bottom:0.5rem;"><b>${escapeHTML(cat.name)}</b>: ${escapeHTML(cat.description)}${cat.ping_on_create ? ' <span class="badge warn">Ping on create</span>' : ''}</li>`;
-        }
-        html += `</ul></div>`;
-    }
-    if (data.ticket_category_roles && Object.keys(data.ticket_category_roles).length > 0) {
-        html += `<div class="dashboard-card" style="margin-bottom:2rem;"><span class="dashboard-label">Category Roles:</span><table style="margin-top:0.7rem;"><tr><th>Category</th><th>Roles</th></tr>`;
-        for (const [cat, roles] of Object.entries(data.ticket_category_roles)) {
-            const roleNamesList = roles.map(r => roleNames[r] || '').filter(Boolean).join(', ');
-            html += `<tr><td>${escapeHTML(cat)}</td><td>${roleNamesList || '<span style=\'color:#888\'>(none)</span>'}</td></tr>`;
-        }
-        html += `</table></div>`;
-    }
+    </div>` + catHtml;
     ticketDiv.innerHTML = html;
     setTimeout(setupDropdownChangeDetection, 0);
 
@@ -666,6 +712,14 @@ function renderTicketSection(data) {
         };
         msgSaveBtn.style.display = 'none';
     }
+
+    // --- Attach change listeners for categories ---
+    document.querySelectorAll('.ticket-cat-name-input, .ticket-cat-desc-input').forEach(input => {
+        input.addEventListener('input', showApplyBar);
+    });
+    document.querySelectorAll('.ticket-cat-roles-select, .ticket-cat-pingroles-select').forEach(sel => {
+        sel.addEventListener('change', showApplyBar);
+    });
 }
 
 function renderLoggingSection(data) {
