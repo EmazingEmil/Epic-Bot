@@ -714,65 +714,103 @@ td {
 
 .ticket-category-edit {
     background: #23272a;
-    border-radius: 10px;
+    border-radius: 14px;
     border: 1.5px solid #5865f2;
-    margin-bottom: 1.5rem;
-    padding: 1.1rem 1.2rem;
-    box-shadow: 0 2px 12px #5865f288;
+    margin-bottom: 2.2rem;
+    padding: 1.5rem 1.7rem 1.2rem 1.7rem;
+    box-shadow: 0 4px 24px #5865f244;
     transition: box-shadow 0.2s, border 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
 }
-.ticket-cat-name-input,
-.ticket-cat-desc-input,
-.ticket-cat-roles-select,
-.ticket-cat-pingroles-select {
-    outline: none;
-    transition: box-shadow 0.2s, border 0.2s;
+
+.ticket-cat-name-input {
+    font-size: 1.18em;
+    font-weight: 700;
+    background: #181b20;
+    color: #fff;
+    border: 1.5px solid #5865f2;
+    border-radius: 8px;
+    padding: 0.5em 1em;
+    width: 100%;
+    margin-bottom: 0.2em;
+    margin-top: 0.1em;
+    transition: border 0.2s, box-shadow 0.2s;
 }
+
+.ticket-cat-desc-input {
+    width: 100%;
+    min-height: 56px;
+    font-size: 1.04em;
+    background: #181b20;
+    color: #fff;
+    border: 1.5px solid #5865f2;
+    border-radius: 8px;
+    padding: 0.7em 1em;
+    margin-top: 0.1em;
+    margin-bottom: 0.2em;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+
 .ticket-cat-name-input:focus,
-.ticket-cat-desc-input:focus,
-.ticket-cat-roles-select:focus,
-.ticket-cat-pingroles-select:focus {
+.ticket-cat-desc-input:focus {
     border-color: #7f5af0;
     box-shadow: 0 0 0 2px #7f5af0;
 }
+
+.ticket-cat-label {
+    color: #bcbcff;
+    font-weight: 600;
+    font-size: 1em;
+    margin-bottom: 0.2em;
+    display: block;
+}
+
 .ticket-cat-roles-select,
 .ticket-cat-pingroles-select {
-    min-width: 160px;
-    max-width: 340px;
+    min-width: 180px;
+    max-width: 380px;
     background: #181b20;
     color: #fff;
-    border-radius: 7px;
+    border-radius: 8px;
     border: 1.5px solid #5865f2;
-    padding: 0.3em 0.8em;
-    font-size: 1em;
+    padding: 0.4em 1em;
+    font-size: 1.04em;
+    margin-top: 0.2em;
+    margin-bottom: 0.2em;
+    transition: border 0.2s, box-shadow 0.2s;
 }
+
 .ticket-cat-pingroles-select {
     border-color: #f5a524;
 }
+
 .ticket-cat-pingroles-select option:disabled {
     color: #888;
     background: #23272a;
 }
-.ticket-cat-name-input {
-    font-size: 1.1em;
-    font-weight: 600;
-    background: #181b20;
-    color: #fff;
-    border: 1.5px solid #5865f2;
-    border-radius: 7px;
-    padding: 0.3em 0.8em;
-    width: 180px;
+
+.ticket-cat-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 2.2rem;
+    flex-wrap: wrap;
 }
-.ticket-cat-desc-input {
-    width: 100%;
-    min-height: 48px;
-    font-size: 1em;
-    background: #181b20;
-    color: #fff;
-    border: 1.5px solid #5865f2;
-    border-radius: 7px;
-    padding: 0.5em 0.8em;
-    margin-top: 0.3em;
+
+@media (max-width: 700px) {
+    .ticket-category-edit {
+        padding: 1rem 0.7rem 1rem 0.7rem;
+    }
+    .ticket-cat-row {
+        flex-direction: column;
+        gap: 1.1rem;
+    }
+    .ticket-cat-roles-select,
+    .ticket-cat-pingroles-select {
+        min-width: 120px;
+        max-width: 100%;
+    }
 }
 
 @media (max-width: 900px) {
