@@ -519,10 +519,22 @@ function renderTicketSection(data) {
         ticketDiv.innerHTML = `<div class="dashboard-card">Ticket system not set up.</div>`;
         return;
     }
+    // --- Editable Rules Field ---
+    let rulesHtml = `
+        <div style="display:flex;align-items:flex-start;gap:0.7rem;">
+            <pre id="ticket-rules-pre" class="dashboard-value" style="white-space:pre-wrap;word-break:break-word;flex:1 1 auto;margin:0;min-width:0;">${escapeHTML(data.ticket_settings.rules_text || '')}</pre>
+            <button id="edit-ticket-rules-btn" class="dashboard-btn" style="flex:0 0 auto;">Edit</button>
+        </div>
+        <div id="ticket-rules-edit-wrap" style="display:none;flex-direction:column;gap:0.5rem;">
+            <textarea id="ticket-rules-edit" style="width:100%;min-height:120px;font-family:inherit;font-size:1rem;resize:vertical;">${escapeHTML(data.ticket_settings.rules_text || '')}</textarea>
+            <button id="save-ticket-rules-btn" class="dashboard-btn" style="align-self:flex-end;">Save</button>
+        </div>
+    `;
+
     let html = `<div class="dashboard-card" style="margin-bottom:2rem; padding-bottom:1.2rem;">
         <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Panel Channel:</span> ${createChannelDropdown(data.ticket_settings.channel_id, channelNames)}</div>
         <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Log Channel:</span> <span class="ticket-log-dropdown">${createChannelDropdown(data.ticket_settings.log_channel_id, channelNames)}</span></div>
-        <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Rules:</span> <span class="dashboard-value">${escapeHTML(data.ticket_settings.rules_text || '')}</span></div>
+        <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Rules:</span> <span style="flex:1 1 auto;min-width:0;display:block;">${rulesHtml}</span></div>
         <div><span class="dashboard-label">Ticket Message:</span> <span class="dashboard-value">${escapeHTML(data.ticket_settings.ticket_msg || '')}</span></div>
     </div>`;
     if (data.ticket_categories && data.ticket_categories.length > 0) {
@@ -542,6 +554,51 @@ function renderTicketSection(data) {
     }
     ticketDiv.innerHTML = html;
     setTimeout(setupDropdownChangeDetection, 0);
+
+    // --- Rules Edit Logic ---
+    const editBtn = document.getElementById('edit-ticket-rules-btn');
+    const pre = document.getElementById('ticket-rules-pre');
+    const editWrap = document.getElementById('ticket-rules-edit-wrap');
+    const textarea = document.getElementById('ticket-rules-edit');
+    const saveBtn = document.getElementById('save-ticket-rules-btn');
+    let originalRules = data.ticket_settings.rules_text || '';
+
+    if (editBtn && pre && editWrap && textarea && saveBtn) {
+        editBtn.onclick = () => {
+            pre.style.display = 'none';
+            editBtn.style.display = 'none';
+            editWrap.style.display = 'flex';
+            textarea.value = originalRules;
+            textarea.focus();
+        };
+        textarea.oninput = () => {
+            // Show save button only if changed
+            saveBtn.style.display = (textarea.value !== originalRules) ? '' : 'none';
+        };
+        saveBtn.onclick = () => {
+            const newRules = textarea.value;
+            if (newRules !== originalRules) {
+                // Update the pre block and the dashboard-value for rules
+                pre.textContent = newRules;
+                originalRules = newRules;
+                // Update the ticket_settings.rules_text in the DOM for applyDropdownChanges
+                // (the .dashboard-value is used by applyDropdownChanges to collect the value)
+                pre.classList.add('dashboard-value');
+                // Find the .dashboard-value for rules and update its textContent
+                pre.textContent = newRules;
+                // Also update the hidden .dashboard-value for applyDropdownChanges
+                // (if you use a hidden input, update that too)
+                // Show apply bar
+                showApplyBar();
+            }
+            pre.style.display = '';
+            editBtn.style.display = '';
+            editWrap.style.display = 'none';
+            saveBtn.style.display = 'none';
+        };
+        // Hide save button initially
+        saveBtn.style.display = 'none';
+    }
 }
 
 function renderLoggingSection(data) {
