@@ -568,45 +568,74 @@ function renderTicketSection(data) {
 
     // --- Editable Categories Section ---
     let catHtml = '';
-    if (data.ticket_categories && data.ticket_categories.length > 0) {
-        catHtml = `<div class="dashboard-card" style="margin-bottom:2rem;">
-            <span class="dashboard-label">Categories:</span>
-            <div id="ticket-categories-edit-list" style="margin-top:1rem;">`;
+    let categories = data.ticket_categories || [];
+    let categoryRoles = data.ticket_category_roles || {};
 
-        data.ticket_categories.forEach((cat, idx) => {
-            const catId = `cat-${idx}`;
-            const rolesForCat = (data.ticket_category_roles && data.ticket_category_roles[cat.name]) ? data.ticket_category_roles[cat.name] : [];
-            const pingRoles = Array.isArray(cat.ping_roles) ? cat.ping_roles : [];
-            catHtml += `
-            <div class="ticket-category-edit" data-cat-idx="${idx}">
-                <label class="ticket-cat-label" for="${catId}-name">Title</label>
-                <input type="text" class="ticket-cat-name-input" id="${catId}-name" value="${escapeHTML(cat.name)}"/>
-                <label class="ticket-cat-label" for="${catId}-desc">Description</label>
-                <textarea class="ticket-cat-desc-input" id="${catId}-desc">${escapeHTML(cat.description)}</textarea>
-                <div class="ticket-cat-row">
-                    <div>
-                        <label class="ticket-cat-label" for="${catId}-roles">Allowed Roles:</label>
-                        <select class="ticket-cat-roles-select" id="${catId}-roles" multiple>
-                            ${Object.entries(roleNames).map(([rid, rname]) =>
-                                `<option value="${rid}"${rolesForCat.includes(rid) ? ' selected' : ''}>${escapeHTML(rname)}</option>`
-                            ).join('')}
-                        </select>
+    // --- Add Category Form ---
+    catHtml += `
+    <div class="dashboard-card" style="margin-bottom:2rem;">
+        <span class="dashboard-label">Categories:</span>
+        <div id="ticket-categories-edit-list" style="margin-top:1rem;">
+            ${categories.map((cat, idx) => {
+                const catId = `cat-${idx}`;
+                const rolesForCat = categoryRoles && categoryRoles[cat.name] ? categoryRoles[cat.name] : [];
+                const pingRoles = Array.isArray(cat.ping_roles) ? cat.ping_roles : [];
+                return `
+                <div class="ticket-category-edit" data-cat-idx="${idx}">
+                    <label class="ticket-cat-label" for="${catId}-name">Title</label>
+                    <input type="text" class="ticket-cat-name-input" id="${catId}-name" value="${escapeHTML(cat.name)}"/>
+                    <label class="ticket-cat-label" for="${catId}-desc">Description</label>
+                    <textarea class="ticket-cat-desc-input" id="${catId}-desc">${escapeHTML(cat.description)}</textarea>
+                    <div class="ticket-cat-row">
+                        <div>
+                            <label class="ticket-cat-label" for="${catId}-roles">Allowed Roles:</label>
+                            <select class="ticket-cat-roles-select" id="${catId}-roles" multiple>
+                                ${Object.entries(roleNames).map(([rid, rname]) =>
+                                    `<option value="${rid}"${rolesForCat.includes(rid) ? ' selected' : ''}>${escapeHTML(rname)}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="ticket-cat-label" for="${catId}-pingroles">Ping Roles:</label>
+                            <select class="ticket-cat-pingroles-select" id="${catId}-pingroles" multiple>
+                                ${Object.entries(roleNames).map(([rid, rname]) =>
+                                    `<option value="${rid}"${pingRoles.includes(rid) ? ' selected' : ''}${!rolesForCat.includes(rid) ? ' disabled' : ''}>${escapeHTML(rname)}</option>`
+                                ).join('')}
+                            </select>
+                            <span style="color:#f5a524;font-size:0.97em;margin-left:0.3em;">(Only roles allowed above can be pinged)</span>
+                        </div>
                     </div>
-                    <div>
-                        <label class="ticket-cat-label" for="${catId}-pingroles">Ping Roles:</label>
-                        <select class="ticket-cat-pingroles-select" id="${catId}-pingroles" multiple>
-                            ${Object.entries(roleNames).map(([rid, rname]) =>
-                                `<option value="${rid}"${pingRoles.includes(rid) ? ' selected' : ''}${!rolesForCat.includes(rid) ? ' disabled' : ''}>${escapeHTML(rname)}</option>`
-                            ).join('')}
-                        </select>
-                        <span style="color:#f5a524;font-size:0.97em;margin-left:0.3em;">(Only roles allowed above can be pinged)</span>
-                    </div>
+                    <button class="dashboard-btn remove-category-btn" data-cat-idx="${idx}" style="margin-top:0.7em;background:#e05f5f;">Remove</button>
+                </div>`;
+            }).join('')}
+        </div>
+        <form id="add-category-form" style="margin-top:2.2rem;display:flex;flex-direction:column;gap:0.7em;">
+            <div style="display:flex;gap:1.2em;flex-wrap:wrap;">
+                <input type="text" id="new-cat-name" placeholder="Category Title" class="ticket-cat-name-input" style="max-width:220px;"/>
+                <input type="text" id="new-cat-desc" placeholder="Description" class="ticket-cat-desc-input" style="max-width:320px;"/>
+            </div>
+            <div class="ticket-cat-row">
+                <div>
+                    <label class="ticket-cat-label" for="new-cat-roles">Allowed Roles:</label>
+                    <select id="new-cat-roles" class="ticket-cat-roles-select" multiple>
+                        ${Object.entries(roleNames).map(([rid, rname]) =>
+                            `<option value="${rid}">${escapeHTML(rname)}</option>`
+                        ).join('')}
+                    </select>
                 </div>
-            </div>`;
-        });
-
-        catHtml += `</div></div>`;
-    }
+                <div>
+                    <label class="ticket-cat-label" for="new-cat-pingroles">Ping Roles:</label>
+                    <select id="new-cat-pingroles" class="ticket-cat-pingroles-select" multiple>
+                        ${Object.entries(roleNames).map(([rid, rname]) =>
+                            `<option value="${rid}">${escapeHTML(rname)}</option>`
+                        ).join('')}
+                    </select>
+                    <span style="color:#f5a524;font-size:0.97em;margin-left:0.3em;">(Only roles allowed above can be pinged)</span>
+                </div>
+            </div>
+            <button type="submit" class="dashboard-btn" style="width:fit-content;background:#2cb67d;">Add Category</button>
+        </form>
+    </div>`;
 
     let html = `<div class="dashboard-card" style="margin-bottom:2rem; padding-bottom:1.2rem;">
         <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Panel Channel:</span> ${createChannelDropdown(data.ticket_settings.channel_id, channelNames)}</div>
@@ -717,6 +746,53 @@ function renderTicketSection(data) {
     });
     document.querySelectorAll('.ticket-cat-roles-select, .ticket-cat-pingroles-select').forEach(sel => {
         sel.addEventListener('change', showApplyBar);
+    });
+
+    // --- Add Category Logic ---
+    const addCatForm = document.getElementById('add-category-form');
+    if (addCatForm) {
+        addCatForm.onsubmit = function (e) {
+            e.preventDefault();
+            const name = document.getElementById('new-cat-name').value.trim();
+            const desc = document.getElementById('new-cat-desc').value.trim();
+            const roles = Array.from(document.getElementById('new-cat-roles').selectedOptions).map(o => o.value);
+            const ping_roles = Array.from(document.getElementById('new-cat-pingroles').selectedOptions).map(o => o.value);
+            if (!name) return;
+            // Add new category to the DOM
+            categories.push({ name, description: desc, roles, ping_roles });
+            // Re-render section (will also trigger showApplyBar)
+            renderTicketSection({
+                ...data,
+                ticket_categories: categories,
+                ticket_category_roles: {
+                    ...categoryRoles,
+                    [name]: roles
+                }
+            });
+            showApplyBar();
+        };
+        // Keep ping_roles in sync with allowed roles
+        document.getElementById('new-cat-roles').addEventListener('change', function () {
+            const allowed = Array.from(this.selectedOptions).map(o => o.value);
+            Array.from(document.getElementById('new-cat-pingroles').options).forEach(opt => {
+                opt.disabled = !allowed.includes(opt.value);
+                if (opt.disabled) opt.selected = false;
+            });
+        });
+    }
+
+    // --- Remove Category Logic ---
+    document.querySelectorAll('.remove-category-btn').forEach(btn => {
+        btn.onclick = function () {
+            const idx = parseInt(btn.getAttribute('data-cat-idx'));
+            categories.splice(idx, 1);
+            renderTicketSection({
+                ...data,
+                ticket_categories: categories,
+                ticket_category_roles: categoryRoles
+            });
+            showApplyBar();
+        };
     });
 }
 
