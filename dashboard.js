@@ -578,8 +578,18 @@ function renderTicketSection(data) {
         <div id="ticket-categories-edit-list" style="margin-top:1rem;">
             ${categories.map((cat, idx) => {
                 const catId = `cat-${idx}`;
-                const rolesForCat = categoryRoles && categoryRoles[cat.name] ? categoryRoles[cat.name] : [];
-                const pingRoles = Array.isArray(cat.ping_roles) ? cat.ping_roles : [];
+                // --- Fix: Use cat.roles and cat.ping_roles if present, else fallback to ticket_category_roles ---
+                const rolesForCat = Array.isArray(cat.roles) ? cat.roles : (categoryRoles && categoryRoles[cat.name] ? categoryRoles[cat.name] : []);
+                // Always ensure roles are strings for comparison
+                const rolesForCatStr = rolesForCat.map(String);
+                // For ping_roles, use cat.ping_roles if present, else fallback to ping_on_create (legacy)
+                let pingRoles = [];
+                if (Array.isArray(cat.ping_roles)) {
+                    pingRoles = cat.ping_roles.map(String);
+                } else if (cat.ping_on_create && rolesForCatStr.length > 0) {
+                    // Legacy: ping all allowed roles if ping_on_create is true
+                    pingRoles = [...rolesForCatStr];
+                }
                 return `
                 <div class="ticket-category-edit" data-cat-idx="${idx}">
                     <label class="ticket-cat-label" for="${catId}-name">Title</label>
@@ -591,7 +601,7 @@ function renderTicketSection(data) {
                             <label class="ticket-cat-label" for="${catId}-roles">Allowed Roles:</label>
                             <select class="ticket-cat-roles-select" id="${catId}-roles" multiple>
                                 ${Object.entries(roleNames).map(([rid, rname]) =>
-                                    `<option value="${rid}"${rolesForCat.includes(rid) ? ' selected' : ''}>${escapeHTML(rname)}</option>`
+                                    `<option value="${rid}"${rolesForCatStr.includes(rid) ? ' selected' : ''}>${escapeHTML(rname)}</option>`
                                 ).join('')}
                             </select>
                         </div>
@@ -599,7 +609,7 @@ function renderTicketSection(data) {
                             <label class="ticket-cat-label" for="${catId}-pingroles">Ping Roles:</label>
                             <select class="ticket-cat-pingroles-select" id="${catId}-pingroles" multiple>
                                 ${Object.entries(roleNames).map(([rid, rname]) =>
-                                    `<option value="${rid}"${pingRoles.includes(rid) ? ' selected' : ''}${!rolesForCat.includes(rid) ? ' disabled' : ''}>${escapeHTML(rname)}</option>`
+                                    `<option value="${rid}"${pingRoles.includes(rid) ? ' selected' : ''}${!rolesForCatStr.includes(rid) ? ' disabled' : ''}>${escapeHTML(rname)}</option>`
                                 ).join('')}
                             </select>
                             <span style="color:#f5a524;font-size:0.97em;margin-left:0.3em;">(Only roles allowed above can be pinged)</span>
@@ -793,6 +803,22 @@ function renderTicketSection(data) {
             });
             showApplyBar();
         };
+    });
+
+    // --- Keep ping_roles in sync with allowed roles for each category ---
+    categories.forEach((cat, idx) => {
+        const catId = `cat-${idx}`;
+        const rolesSel = document.getElementById(`${catId}-roles`);
+        const pingSel = document.getElementById(`${catId}-pingroles`);
+        if (rolesSel && pingSel) {
+            rolesSel.addEventListener('change', function () {
+                const allowed = Array.from(rolesSel.selectedOptions).map(o => o.value);
+                Array.from(pingSel.options).forEach(opt => {
+                    opt.disabled = !allowed.includes(opt.value);
+                    if (opt.disabled) opt.selected = false;
+                });
+            });
+        }
     });
 }
 
