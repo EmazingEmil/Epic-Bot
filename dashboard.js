@@ -522,12 +522,24 @@ function renderTicketSection(data) {
     // --- Editable Rules Field ---
     let rulesHtml = `
         <div style="display:flex;align-items:flex-start;gap:0.7rem;">
-            <pre id="ticket-rules-pre" class="dashboard-value" style="white-space:pre-wrap;word-break:break-word;flex:1 1 auto;margin:0;min-width:0;">${escapeHTML(data.ticket_settings.rules_text || '')}</pre>
+            <pre id="ticket-rules-pre" class="dashboard-value" style="white-space:pre-wrap;word-break:break-word;flex:1 1 auto;margin:0;min-width:0;border:1.5px solid #5865f2;border-radius:7px;padding:0.7em 1em;background:#23272a;">${escapeHTML(data.ticket_settings.rules_text || '')}</pre>
             <button id="edit-ticket-rules-btn" class="dashboard-btn" style="flex:0 0 auto;">Edit</button>
         </div>
         <div id="ticket-rules-edit-wrap" style="display:none;flex-direction:column;gap:0.5rem;">
-            <textarea id="ticket-rules-edit" style="width:100%;min-height:120px;font-family:inherit;font-size:1rem;resize:vertical;">${escapeHTML(data.ticket_settings.rules_text || '')}</textarea>
+            <textarea id="ticket-rules-edit" style="width:100%;min-height:120px;font-family:inherit;font-size:1rem;resize:vertical;border:1.5px solid #5865f2;border-radius:7px;padding:0.7em 1em;background:#23272a;color:#fff;">${escapeHTML(data.ticket_settings.rules_text || '')}</textarea>
             <button id="save-ticket-rules-btn" class="dashboard-btn" style="align-self:flex-end;">Save</button>
+        </div>
+    `;
+
+    // --- Editable Ticket Message Field ---
+    let ticketMsgHtml = `
+        <div style="display:flex;align-items:flex-start;gap:0.7rem;">
+            <pre id="ticket-msg-pre" class="dashboard-value" style="white-space:pre-wrap;word-break:break-word;flex:1 1 auto;margin:0;min-width:0;border:1.5px solid #5865f2;border-radius:7px;padding:0.7em 1em;background:#23272a;">${escapeHTML(data.ticket_settings.ticket_msg || '')}</pre>
+            <button id="edit-ticket-msg-btn" class="dashboard-btn" style="flex:0 0 auto;">Edit</button>
+        </div>
+        <div id="ticket-msg-edit-wrap" style="display:none;flex-direction:column;gap:0.5rem;">
+            <textarea id="ticket-msg-edit" style="width:100%;min-height:80px;font-family:inherit;font-size:1rem;resize:vertical;border:1.5px solid #5865f2;border-radius:7px;padding:0.7em 1em;background:#23272a;color:#fff;">${escapeHTML(data.ticket_settings.ticket_msg || '')}</textarea>
+            <button id="save-ticket-msg-btn" class="dashboard-btn" style="align-self:flex-end;">Save</button>
         </div>
     `;
 
@@ -535,7 +547,7 @@ function renderTicketSection(data) {
         <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Panel Channel:</span> ${createChannelDropdown(data.ticket_settings.channel_id, channelNames)}</div>
         <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Log Channel:</span> <span class="ticket-log-dropdown">${createChannelDropdown(data.ticket_settings.log_channel_id, channelNames)}</span></div>
         <div style="margin-bottom:1.1rem;"><span class="dashboard-label">Rules:</span> <span style="flex:1 1 auto;min-width:0;display:block;">${rulesHtml}</span></div>
-        <div><span class="dashboard-label">Ticket Message:</span> <span class="dashboard-value">${escapeHTML(data.ticket_settings.ticket_msg || '')}</span></div>
+        <div><span class="dashboard-label">Ticket Message:</span> <span style="flex:1 1 auto;min-width:0;display:block;">${ticketMsgHtml}</span></div>
     </div>`;
     if (data.ticket_categories && data.ticket_categories.length > 0) {
         html += `<div class="dashboard-card" style="margin-bottom:2rem;"><span class="dashboard-label">Categories:</span><ul class="dashboard-list" style="margin-top:0.7rem; margin-bottom:0.7rem;">`;
@@ -572,23 +584,15 @@ function renderTicketSection(data) {
             textarea.focus();
         };
         textarea.oninput = () => {
-            // Show save button only if changed
             saveBtn.style.display = (textarea.value !== originalRules) ? '' : 'none';
         };
         saveBtn.onclick = () => {
             const newRules = textarea.value;
             if (newRules !== originalRules) {
-                // Update the pre block and the dashboard-value for rules
                 pre.textContent = newRules;
                 originalRules = newRules;
-                // Update the ticket_settings.rules_text in the DOM for applyDropdownChanges
-                // (the .dashboard-value is used by applyDropdownChanges to collect the value)
                 pre.classList.add('dashboard-value');
-                // Find the .dashboard-value for rules and update its textContent
                 pre.textContent = newRules;
-                // Also update the hidden .dashboard-value for applyDropdownChanges
-                // (if you use a hidden input, update that too)
-                // Show apply bar
                 showApplyBar();
             }
             pre.style.display = '';
@@ -596,8 +600,43 @@ function renderTicketSection(data) {
             editWrap.style.display = 'none';
             saveBtn.style.display = 'none';
         };
-        // Hide save button initially
         saveBtn.style.display = 'none';
+    }
+
+    // --- Ticket Message Edit Logic ---
+    const editMsgBtn = document.getElementById('edit-ticket-msg-btn');
+    const msgPre = document.getElementById('ticket-msg-pre');
+    const msgEditWrap = document.getElementById('ticket-msg-edit-wrap');
+    const msgTextarea = document.getElementById('ticket-msg-edit');
+    const msgSaveBtn = document.getElementById('save-ticket-msg-btn');
+    let originalMsg = data.ticket_settings.ticket_msg || '';
+
+    if (editMsgBtn && msgPre && msgEditWrap && msgTextarea && msgSaveBtn) {
+        editMsgBtn.onclick = () => {
+            msgPre.style.display = 'none';
+            editMsgBtn.style.display = 'none';
+            msgEditWrap.style.display = 'flex';
+            msgTextarea.value = originalMsg;
+            msgTextarea.focus();
+        };
+        msgTextarea.oninput = () => {
+            msgSaveBtn.style.display = (msgTextarea.value !== originalMsg) ? '' : 'none';
+        };
+        msgSaveBtn.onclick = () => {
+            const newMsg = msgTextarea.value;
+            if (newMsg !== originalMsg) {
+                msgPre.textContent = newMsg;
+                originalMsg = newMsg;
+                msgPre.classList.add('dashboard-value');
+                msgPre.textContent = newMsg;
+                showApplyBar();
+            }
+            msgPre.style.display = '';
+            editMsgBtn.style.display = '';
+            msgEditWrap.style.display = 'none';
+            msgSaveBtn.style.display = 'none';
+        };
+        msgSaveBtn.style.display = 'none';
     }
 }
 
