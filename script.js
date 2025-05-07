@@ -142,6 +142,20 @@ function handleLoginSection() {
         }
     }
 
+    // --- Hide dashboard title and login button if logged in ---
+    if (userId && username) {
+        const loginBtn = document.getElementById('discord-login-btn');
+        if (loginBtn) loginBtn.style.display = 'none';
+        const dashTitle = document.querySelector('#login h2');
+        if (dashTitle) dashTitle.style.display = 'none';
+    } else {
+        // Show them if not logged in
+        const loginBtn = document.getElementById('discord-login-btn');
+        if (loginBtn) loginBtn.style.display = '';
+        const dashTitle = document.querySelector('#login h2');
+        if (dashTitle) dashTitle.style.display = '';
+    }
+
     if (userId && username) {
         fetch('https://epic-bot-backend-production.up.railway.app/api/bot-guilds', { credentials: 'include' })
             .then(res => res.json())
