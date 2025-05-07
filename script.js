@@ -15,6 +15,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 adminGuildsList.style.display = 'none';
             }
         }
+        // Hide or show the login section itself
+        const loginSection = document.getElementById('login');
+        if (loginSection) {
+            if (page === 'login') {
+                loginSection.style.display = '';
+            } else {
+                loginSection.style.display = 'none';
+            }
+        }
         sections.forEach(section => {
             if (section.id === page) {
                 section.classList.add('active');
