@@ -900,7 +900,9 @@ document.getElementById('guild-name').textContent = 'Your Server Name';
 
 if (guildId) {
     showLoadingSpinner();
-    fetch(`https://epic-bot-backend-production.up.railway.app/api/guild-dashboard?guild_id=${guildId}`)
+    fetch(`https://epic-bot-backend-production.up.railway.app/api/guild-dashboard?guild_id=${guildId}`, {
+        credentials: 'include' // <-- Add this line!
+    })
         .then(res => {
             if (!res.ok) throw new Error('API response not ok: ' + res.status);
             return res.json();
