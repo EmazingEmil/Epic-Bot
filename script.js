@@ -143,7 +143,7 @@ function handleLoginSection() {
     }
 
     if (userId && username) {
-        fetch('https://epic-bot-backend-production.up.railway.app/api/bot-guilds')
+        fetch('https://epic-bot-backend-production.up.railway.app/api/bot-guilds', { credentials: 'include' })
             .then(res => res.json())
             .then(botGuilds => {
                 if (!Array.isArray(botGuilds)) {
