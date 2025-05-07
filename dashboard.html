@@ -9,6 +9,18 @@
     <link rel="icon" type="image/png" href="Epic Bot.png">
 </head>
 <body style="background: var(--bg); color: var(--text); font-family: 'Montserrat', sans-serif;">
+    <script>
+    // Simple session check (requires backend to set a session cookie)
+    fetch('https://epic-bot-backend-production.up.railway.app/api/me', { credentials: 'include' })
+        .then(res => {
+            if (res.status === 401) {
+                window.location.href = 'index.html#login';
+            }
+        })
+        .catch(() => {
+            window.location.href = 'index.html#login';
+        });
+    </script>
     <div class="dashboard-container">
         <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar">☰</button>
         <nav class="dashboard-nav glass">
