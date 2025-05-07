@@ -1,6 +1,22 @@
 const urlParams = new URLSearchParams(window.location.search);
 const guildId = urlParams.get('guild_id');
 
+// --- Add session-based guild access check ---
+fetch('https://epic-bot-backend-production.up.railway.app/api/my-guilds', { credentials: 'include' })
+    .then(res => {
+        if (!res.ok) throw new Error('Not authenticated');
+        return res.json();
+    })
+    .then(myGuilds => {
+        if (!guildId || !myGuilds.includes(guildId)) {
+            // Not allowed to access this guild
+            window.location.href = 'index.html#login';
+        }
+    })
+    .catch(() => {
+        window.location.href = 'index.html#login';
+    });
+
 function escapeHTML(str) {
     return str.replace(/[&<>'"]/g, tag => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[tag]));
 }
