@@ -10,10 +10,11 @@
 </head>
 <body style="background: var(--bg); color: var(--text); font-family: 'Montserrat', sans-serif;">
     <script>
-    // Only load dashboard scripts if authenticated
+    // Check authentication before loading dashboard scripts
     fetch('https://epic-bot-backend-production.up.railway.app/api/me', { credentials: 'include' })
         .then(res => {
             if (res.status === 401) {
+                // Not authenticated, redirect to login
                 window.location.href = 'index.html#login';
             } else {
                 // Authenticated, load dashboard scripts
@@ -79,4 +80,3 @@
     </div>
 </body>
 </html>
-``` 
