@@ -10,11 +10,19 @@
 </head>
 <body style="background: var(--bg); color: var(--text); font-family: 'Montserrat', sans-serif;">
     <script>
-    // Simple session check (requires backend to set a session cookie)
+    // Only load dashboard scripts if authenticated
     fetch('https://epic-bot-backend-production.up.railway.app/api/me', { credentials: 'include' })
         .then(res => {
             if (res.status === 401) {
                 window.location.href = 'index.html#login';
+            } else {
+                // Authenticated, load dashboard scripts
+                var s1 = document.createElement('script');
+                s1.src = 'dashboard.js';
+                document.body.appendChild(s1);
+                var s2 = document.createElement('script');
+                s2.src = 'dashboard2.js';
+                document.body.appendChild(s2);
             }
         })
         .catch(() => {
@@ -69,7 +77,6 @@
             <button id="apply-changes-cancel" class="cancel-btn">Cancel</button>
         </div>
     </div>
-    <script src="dashboard.js"></script>
-    <script src="dashboard2.js"></script>
 </body>
 </html>
+``` 
