@@ -6,6 +6,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const sections = document.querySelectorAll('.page-section');
 
     function showSection(page) {
+        const adminGuildsList = document.getElementById('admin-guilds-list');
+        // Hide guilds list unless on login/dashboard page
+        if (adminGuildsList) {
+            if (page === 'login') {
+                adminGuildsList.style.display = '';
+            } else {
+                adminGuildsList.style.display = 'none';
+            }
+        }
         sections.forEach(section => {
             if (section.id === page) {
                 section.classList.add('active');
