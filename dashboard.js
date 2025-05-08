@@ -2,27 +2,16 @@ const urlParams = new URLSearchParams(window.location.search);
 const guildId = urlParams.get('guild_id');
 
 // Helper: Check session validity and redirect if not valid
-async function checkSessionOrRedirect(showApplyBarErrorMsg) {
+async function checkSessionOrRedirect() {
     try {
         const res = await fetch('https://epic-bot-backend-production.up.railway.app/api/me', { credentials: 'include' });
         if (res.status !== 200) {
-            if (showApplyBarErrorMsg) {
-                showApplyBarError("Please log in again, your session has expired.");
-            } else {
-                window.location.href = 'index.html#login';
-            }
+            window.location.href = 'index.html#login';
             return false;
         }
-        // Save session info locally for persistence
-        const data = await res.json();
-        localStorage.setItem('epicbot_session_user', JSON.stringify(data));
         return true;
     } catch {
-        if (showApplyBarErrorMsg) {
-            showApplyBarError("Please log in again, your session has expired.");
-        } else {
-            window.location.href = 'index.html#login';
-        }
+        window.location.href = 'index.html#login';
         return false;
     }
 }
@@ -36,9 +25,8 @@ async function checkSessionOrRedirect(showApplyBarErrorMsg) {
             return res.json();
         })
         .then(myGuilds => {
-            // Save guilds locally for persistence
-            localStorage.setItem('epicbot_session_guilds', JSON.stringify(myGuilds));
             if (!guildId || !myGuilds.includes(guildId)) {
+                // Not allowed to access this guild
                 window.location.href = 'index.html#login';
             }
         })
@@ -363,8 +351,7 @@ function collectTicketCategories() {
     return cats;
 }
 
-async function applyDropdownChanges() {
-    if (!(await checkSessionOrRedirect(true))) return;
+function applyDropdownChanges() {
     showApplyBarLoading();
     // Collect the current dropdown selections by dropdown id
     const dropdowns = document.querySelectorAll('.channel-dropdown-box');
@@ -937,17 +924,10 @@ showSection('overview');
 
 document.getElementById('guild-name').textContent = 'Your Server Name';
 
-function attachApplyCancelListeners() {
-    const applyBtn = document.getElementById('apply-changes-apply');
-    const cancelBtn = document.getElementById('apply-changes-cancel');
-    if (applyBtn) applyBtn.onclick = applyDropdownChanges;
-    if (cancelBtn) cancelBtn.onclick = resetDropdownsToOriginal;
-}
-
 if (guildId) {
     showLoadingSpinner();
     fetch(`https://epic-bot-backend-production.up.railway.app/api/guild-dashboard?guild_id=${guildId}`, {
-        credentials: 'include'
+        credentials: 'include' // <-- Add this line!
     })
         .then(res => {
             if (!res.ok) throw new Error('API response not ok: ' + res.status);
@@ -971,7 +951,6 @@ if (guildId) {
             renderTicketSection(data);
             renderLoggingSection(data);
             renderLevelingSection(data);
-            attachApplyCancelListeners();
             document.querySelectorAll('.collapsible').forEach(btn => {
                 btn.onclick = function() {
                     this.classList.toggle("active");
@@ -1014,12 +993,6 @@ document.addEventListener('mouseout', function(e) {
 
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(setupDropdownChangeDetection, 1000);
-    attachApplyCancelListeners();
-    // Restore session user/guilds if present
-    try {
-        const user = JSON.parse(localStorage.getItem('epicbot_session_user') || '{}');
-        const guilds = JSON.parse(localStorage.getItem('epicbot_session_guilds') || '[]');
-        // Optionally, use this info to show user/guilds in the UI if needed
-        // e.g. document.getElementById('guild-name').textContent = user.username || 'Your Server Name';
-    } catch {}
+    document.getElementById('apply-changes-cancel').onclick = resetDropdownsToOriginal;
+    document.getElementById('apply-changes-apply').onclick = applyDropdownChanges;
 });
