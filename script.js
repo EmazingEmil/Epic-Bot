@@ -141,10 +141,87 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error contacting backend:', error);
         });
 
+    // --- New: Always check for active session and show guilds if logged in ---
+    checkAndShowSessionGuilds();
+
     handleLoginSection();
 });
 
 window.addEventListener('hashchange', handleLoginSection);
+
+// --- New: Helper to check session and show guilds if logged in ---
+function checkAndShowSessionGuilds() {
+    fetch('https://epic-bot-backend-production.up.railway.app/api/me', { credentials: 'include' })
+        .then(res => {
+            if (res.status !== 200) {
+                // Not logged in, show login button
+                showLoginUI();
+                return;
+            }
+            return res.json();
+        })
+        .then(user => {
+            if (!user || !user.user_id) {
+                showLoginUI();
+                return;
+            }
+            // Hide login button, show welcome
+            const loginBtn = document.getElementById('discord-login-btn');
+            if (loginBtn) loginBtn.style.display = 'none';
+            const dashTitle = document.querySelector('#login h2');
+            if (dashTitle) dashTitle.style.display = 'none';
+            // Fetch guilds
+            fetch('https://epic-bot-backend-production.up.railway.app/api/my-guilds', { credentials: 'include' })
+                .then(res => res.json())
+                .then(guildIds => {
+                    // Optionally, fetch guild details from your backend or cache
+                    // For demo, just show the IDs
+                    const adminGuildsList = document.getElementById('admin-guilds-list');
+                    if (adminGuildsList) {
+                        adminGuildsList.innerHTML = `
+                            <h3>Welcome, <strong>${user.username}</strong>!</h3>
+                            <p>You are an admin in <strong>${guildIds.length}</strong> servers.</p>
+                            <div class="guilds-list"></div>
+                        `;
+                        // You may want to fetch more info about each guild (name, icon) from your backend
+                        // For now, just show the IDs
+                        const guildsListDiv = adminGuildsList.querySelector('.guilds-list');
+                        if (guildsListDiv) {
+                            if (guildIds.length === 0) {
+                                guildsListDiv.innerHTML = '<p>You are not an admin in any servers.</p>';
+                            } else {
+                                guildsListDiv.innerHTML = guildIds.map(gid => `
+                                    <button class="guild-card" data-guild-id="${gid}" title="Go to dashboard for ${gid}">
+                                        <div class="guild-name">${gid}</div>
+                                        <div style="color:#2cb67d;font-size:0.95rem;margin-top:0.3rem;">Manage server</div>
+                                    </button>
+                                `).join('');
+                                guildsListDiv.querySelectorAll('.guild-card').forEach(card => {
+                                    card.addEventListener('click', function(e) {
+                                        e.preventDefault();
+                                        const guildId = String(this.getAttribute('data-guild-id'));
+                                        window.location.href = `dashboard.html?guild_id=${guildId}`;
+                                    });
+                                });
+                            }
+                        }
+                    }
+                });
+        })
+        .catch(() => {
+            showLoginUI();
+        });
+}
+
+function showLoginUI() {
+    // Show login button and title, hide guilds
+    const loginBtn = document.getElementById('discord-login-btn');
+    if (loginBtn) loginBtn.style.display = '';
+    const dashTitle = document.querySelector('#login h2');
+    if (dashTitle) dashTitle.style.display = '';
+    const adminGuildsList = document.getElementById('admin-guilds-list');
+    if (adminGuildsList) adminGuildsList.innerHTML = '';
+}
 
 function handleLoginSection() {
     const urlParams = new URLSearchParams(window.location.search);
