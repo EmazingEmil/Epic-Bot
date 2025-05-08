@@ -2,16 +2,27 @@ const urlParams = new URLSearchParams(window.location.search);
 const guildId = urlParams.get('guild_id');
 
 // Helper: Check session validity and redirect if not valid
-async function checkSessionOrRedirect() {
+async function checkSessionOrRedirect(showApplyBarErrorMsg) {
     try {
         const res = await fetch('https://epic-bot-backend-production.up.railway.app/api/me', { credentials: 'include' });
         if (res.status !== 200) {
-            window.location.href = 'index.html#login';
+            if (showApplyBarErrorMsg) {
+                showApplyBarError("Please log in again, your session has expired.");
+            } else {
+                window.location.href = 'index.html#login';
+            }
             return false;
         }
+        // Save session info locally for persistence
+        const data = await res.json();
+        localStorage.setItem('epicbot_session_user', JSON.stringify(data));
         return true;
     } catch {
-        window.location.href = 'index.html#login';
+        if (showApplyBarErrorMsg) {
+            showApplyBarError("Please log in again, your session has expired.");
+        } else {
+            window.location.href = 'index.html#login';
+        }
         return false;
     }
 }
@@ -25,8 +36,9 @@ async function checkSessionOrRedirect() {
             return res.json();
         })
         .then(myGuilds => {
+            // Save guilds locally for persistence
+            localStorage.setItem('epicbot_session_guilds', JSON.stringify(myGuilds));
             if (!guildId || !myGuilds.includes(guildId)) {
-                // Not allowed to access this guild
                 window.location.href = 'index.html#login';
             }
         })
@@ -351,7 +363,8 @@ function collectTicketCategories() {
     return cats;
 }
 
-function applyDropdownChanges() {
+async function applyDropdownChanges() {
+    if (!(await checkSessionOrRedirect(true))) return;
     showApplyBarLoading();
     // Collect the current dropdown selections by dropdown id
     const dropdowns = document.querySelectorAll('.channel-dropdown-box');
@@ -995,4 +1008,11 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(setupDropdownChangeDetection, 1000);
     document.getElementById('apply-changes-cancel').onclick = resetDropdownsToOriginal;
     document.getElementById('apply-changes-apply').onclick = applyDropdownChanges;
+    // Restore session user/guilds if present
+    try {
+        const user = JSON.parse(localStorage.getItem('epicbot_session_user') || '{}');
+        const guilds = JSON.parse(localStorage.getItem('epicbot_session_guilds') || '[]');
+        // Optionally, use this info to show user/guilds in the UI if needed
+        // e.g. document.getElementById('guild-name').textContent = user.username || 'Your Server Name';
+    } catch {}
 });
