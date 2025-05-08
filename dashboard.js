@@ -1,21 +1,39 @@
 const urlParams = new URLSearchParams(window.location.search);
 const guildId = urlParams.get('guild_id');
 
-// --- Add session-based guild access check ---
-fetch('https://epic-bot-backend-production.up.railway.app/api/my-guilds', { credentials: 'include' })
-    .then(res => {
-        if (!res.ok) throw new Error('Not authenticated');
-        return res.json();
-    })
-    .then(myGuilds => {
-        if (!guildId || !myGuilds.includes(guildId)) {
-            // Not allowed to access this guild
+// Helper: Check session validity and redirect if not valid
+async function checkSessionOrRedirect() {
+    try {
+        const res = await fetch('https://epic-bot-backend-production.up.railway.app/api/me', { credentials: 'include' });
+        if (res.status !== 200) {
             window.location.href = 'index.html#login';
+            return false;
         }
-    })
-    .catch(() => {
+        return true;
+    } catch {
         window.location.href = 'index.html#login';
-    });
+        return false;
+    }
+}
+
+// --- Add session-based guild access check ---
+(async () => {
+    if (!(await checkSessionOrRedirect())) return;
+    fetch('https://epic-bot-backend-production.up.railway.app/api/my-guilds', { credentials: 'include' })
+        .then(res => {
+            if (!res.ok) throw new Error('Not authenticated');
+            return res.json();
+        })
+        .then(myGuilds => {
+            if (!guildId || !myGuilds.includes(guildId)) {
+                // Not allowed to access this guild
+                window.location.href = 'index.html#login';
+            }
+        })
+        .catch(() => {
+            window.location.href = 'index.html#login';
+        });
+})();
 
 function escapeHTML(str) {
     return str.replace(/[&<>'"]/g, tag => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[tag]));
@@ -853,6 +871,13 @@ function showSection(section) {
     }, 10);
 }
 
+// Wrap showSection to check session before switching sections
+const originalShowSection = showSection;
+showSection = async function(section) {
+    if (!(await checkSessionOrRedirect())) return;
+    originalShowSection(section);
+};
+
 const sidebar = document.querySelector('.dashboard-nav');
 const sidebarToggle = document.getElementById('sidebar-toggle');
 const navLinks = document.querySelectorAll('.dashboard-nav a[data-page]');
@@ -880,8 +905,9 @@ sidebarToggle.addEventListener('click', () => {
 });
 
 navLinks.forEach(link => {
-    link.addEventListener('click', e => {
+    link.addEventListener('click', async e => {
         e.preventDefault();
+        if (!(await checkSessionOrRedirect())) return;
         navLinks.forEach(l => l.classList.remove('active'));
         link.classList.add('active');
         const page = link.getAttribute('data-page');
