@@ -147,7 +147,17 @@ document.addEventListener('DOMContentLoaded', () => {
     handleLoginSection();
 });
 
-window.addEventListener('hashchange', handleLoginSection);
+// --- Ensure session check also runs on first full page load (extra robust) ---
+window.addEventListener('load', () => {
+    checkAndShowSessionGuilds();
+    handleLoginSection();
+});
+
+window.addEventListener('hashchange', () => {
+    // Always check session on hash change (e.g., user navigates to #login)
+    checkAndShowSessionGuilds();
+    handleLoginSection();
+});
 
 // --- New: Helper to check session and show guilds if logged in ---
 function checkAndShowSessionGuilds() {
