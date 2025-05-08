@@ -101,48 +101,24 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
+    // If OAuth code is present, handle login and then update UI as if just logged in
     if (window.location.search.includes('code=')) {
         fetch('https://epic-bot-backend-production.up.railway.app/login/callback' + window.location.search)
             .then(response => response.json())
-            .then(data => {
-                const listDiv = document.getElementById('admin-guilds-list');
-                if (listDiv && data.admin_guilds) {
-                    if (data.admin_guilds.length === 0) {
-                        listDiv.innerHTML = '<p>You are not an admin in any servers.</p>';
-                    } else {
-                        listDiv.innerHTML = '<h3>Your Admin Servers:</h3>' +
-                            '<div class="guilds-list">' +
-                            data.admin_guilds.map(g => {
-                                const iconUrl = g.icon
-                                    ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`
-                                    : 'https://cdn.discordapp.com/embed/avatars/0.png';
-                                return `
-                                    <div class="guild-card">
-                                        <img class="guild-icon" src="${iconUrl}" alt="Server Icon">
-                                        <div class="guild-name">${g.name}</div>
-                                    </div>
-                                `;
-                            }).join('') +
-                            '</div>';
-                    }
-                }
+            .then(user => {
+                // Always call the unified post-login logic
+                onLoginSuccess(user);
+                // Optionally, clear the code from the URL so refresh doesn't re-trigger login
+                window.history.replaceState({}, document.title, window.location.pathname);
             })
             .catch(error => {
                 console.error('Error fetching admin guilds:', error);
+                showLoginUI();
             });
+    } else {
+        // On normal load, always check session and update UI
+        checkAndShowSessionGuilds();
     }
-
-    fetch('https://epic-bot-backend-production.up.railway.app/')
-        .then(response => response.json())
-        .then(data => {
-            // Optionally, show it on the page:
-        })
-        .catch(error => {
-            console.error('Error contacting backend:', error);
-        });
-
-    // --- New: Always check for active session and show guilds if logged in ---
-    checkAndShowSessionGuilds();
 
     handleLoginSection();
 });
@@ -159,12 +135,55 @@ window.addEventListener('hashchange', () => {
     handleLoginSection();
 });
 
-// --- New: Helper to check session and show guilds if logged in ---
+// --- Unified post-login logic ---
+function onLoginSuccess(user) {
+    // Hide login button and title, show welcome and guilds
+    const loginBtn = document.getElementById('discord-login-btn');
+    if (loginBtn) loginBtn.style.display = 'none';
+    const dashTitle = document.querySelector('#login h2');
+    if (dashTitle) dashTitle.style.display = 'none';
+    const adminGuildsList = document.getElementById('admin-guilds-list');
+    if (adminGuildsList) adminGuildsList.style.display = '';
+
+    // Fetch guilds and show them
+    fetch('https://epic-bot-backend-production.up.railway.app/api/my-guilds', { credentials: 'include' })
+        .then(res => res.json())
+        .then(guildIds => {
+            if (adminGuildsList) {
+                adminGuildsList.innerHTML = `
+                    <h3>Welcome, <strong>${user.username}</strong>!</h3>
+                    <p>You are an admin in <strong>${guildIds.length}</strong> servers.</p>
+                    <div class="guilds-list"></div>
+                `;
+                const guildsListDiv = adminGuildsList.querySelector('.guilds-list');
+                if (guildsListDiv) {
+                    if (guildIds.length === 0) {
+                        guildsListDiv.innerHTML = '<p>You are not an admin in any servers.</p>';
+                    } else {
+                        guildsListDiv.innerHTML = guildIds.map(gid => `
+                            <button class="guild-card" data-guild-id="${gid}" title="Go to dashboard for ${gid}">
+                                <div class="guild-name">${gid}</div>
+                                <div style="color:#2cb67d;font-size:0.95rem;margin-top:0.3rem;">Manage server</div>
+                            </button>
+                        `).join('');
+                        guildsListDiv.querySelectorAll('.guild-card').forEach(card => {
+                            card.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                const guildId = String(this.getAttribute('data-guild-id'));
+                                window.location.href = `dashboard.html?guild_id=${guildId}`;
+                            });
+                        });
+                    }
+                }
+            }
+        });
+}
+
+// --- Helper to check session and show guilds if logged in ---
 function checkAndShowSessionGuilds() {
     fetch('https://epic-bot-backend-production.up.railway.app/api/me', { credentials: 'include' })
         .then(res => {
             if (res.status !== 200) {
-                // Not logged in, show login button
                 showLoginUI();
                 return;
             }
@@ -175,48 +194,8 @@ function checkAndShowSessionGuilds() {
                 showLoginUI();
                 return;
             }
-            // Hide login button, show welcome
-            const loginBtn = document.getElementById('discord-login-btn');
-            if (loginBtn) loginBtn.style.display = 'none';
-            const dashTitle = document.querySelector('#login h2');
-            if (dashTitle) dashTitle.style.display = 'none';
-            // Fetch guilds
-            fetch('https://epic-bot-backend-production.up.railway.app/api/my-guilds', { credentials: 'include' })
-                .then(res => res.json())
-                .then(guildIds => {
-                    // Optionally, fetch guild details from your backend or cache
-                    // For demo, just show the IDs
-                    const adminGuildsList = document.getElementById('admin-guilds-list');
-                    if (adminGuildsList) {
-                        adminGuildsList.innerHTML = `
-                            <h3>Welcome, <strong>${user.username}</strong>!</h3>
-                            <p>You are an admin in <strong>${guildIds.length}</strong> servers.</p>
-                            <div class="guilds-list"></div>
-                        `;
-                        // You may want to fetch more info about each guild (name, icon) from your backend
-                        // For now, just show the IDs
-                        const guildsListDiv = adminGuildsList.querySelector('.guilds-list');
-                        if (guildsListDiv) {
-                            if (guildIds.length === 0) {
-                                guildsListDiv.innerHTML = '<p>You are not an admin in any servers.</p>';
-                            } else {
-                                guildsListDiv.innerHTML = guildIds.map(gid => `
-                                    <button class="guild-card" data-guild-id="${gid}" title="Go to dashboard for ${gid}">
-                                        <div class="guild-name">${gid}</div>
-                                        <div style="color:#2cb67d;font-size:0.95rem;margin-top:0.3rem;">Manage server</div>
-                                    </button>
-                                `).join('');
-                                guildsListDiv.querySelectorAll('.guild-card').forEach(card => {
-                                    card.addEventListener('click', function(e) {
-                                        e.preventDefault();
-                                        const guildId = String(this.getAttribute('data-guild-id'));
-                                        window.location.href = `dashboard.html?guild_id=${guildId}`;
-                                    });
-                                });
-                            }
-                        }
-                    }
-                });
+            // Call the unified post-login logic
+            onLoginSuccess(user);
         })
         .catch(() => {
             showLoginUI();
@@ -230,7 +209,10 @@ function showLoginUI() {
     const dashTitle = document.querySelector('#login h2');
     if (dashTitle) dashTitle.style.display = '';
     const adminGuildsList = document.getElementById('admin-guilds-list');
-    if (adminGuildsList) adminGuildsList.innerHTML = '';
+    if (adminGuildsList) {
+        adminGuildsList.innerHTML = '';
+        adminGuildsList.style.display = '';
+    }
 }
 
 function handleLoginSection() {
