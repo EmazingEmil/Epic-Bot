@@ -937,10 +937,17 @@ showSection('overview');
 
 document.getElementById('guild-name').textContent = 'Your Server Name';
 
+function attachApplyCancelListeners() {
+    const applyBtn = document.getElementById('apply-changes-apply');
+    const cancelBtn = document.getElementById('apply-changes-cancel');
+    if (applyBtn) applyBtn.onclick = applyDropdownChanges;
+    if (cancelBtn) cancelBtn.onclick = resetDropdownsToOriginal;
+}
+
 if (guildId) {
     showLoadingSpinner();
     fetch(`https://epic-bot-backend-production.up.railway.app/api/guild-dashboard?guild_id=${guildId}`, {
-        credentials: 'include' // <-- Add this line!
+        credentials: 'include'
     })
         .then(res => {
             if (!res.ok) throw new Error('API response not ok: ' + res.status);
@@ -964,6 +971,7 @@ if (guildId) {
             renderTicketSection(data);
             renderLoggingSection(data);
             renderLevelingSection(data);
+            attachApplyCancelListeners();
             document.querySelectorAll('.collapsible').forEach(btn => {
                 btn.onclick = function() {
                     this.classList.toggle("active");
@@ -1006,8 +1014,7 @@ document.addEventListener('mouseout', function(e) {
 
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(setupDropdownChangeDetection, 1000);
-    document.getElementById('apply-changes-cancel').onclick = resetDropdownsToOriginal;
-    document.getElementById('apply-changes-apply').onclick = applyDropdownChanges;
+    attachApplyCancelListeners();
     // Restore session user/guilds if present
     try {
         const user = JSON.parse(localStorage.getItem('epicbot_session_user') || '{}');
