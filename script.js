@@ -147,11 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     handleLoginSection();
 });
 
-window.addEventListener('hashchange', () => {
-    // Always check session on hash change (e.g., user navigates to #login)
-    checkAndShowSessionGuilds();
-    handleLoginSection();
-});
+window.addEventListener('hashchange', handleLoginSection);
 
 // --- New: Helper to check session and show guilds if logged in ---
 function checkAndShowSessionGuilds() {
