@@ -2,6 +2,40 @@ console.log('Script loaded');
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Script loaded and DOM fully parsed.');
 
+    // Check for authorization cookie
+    const authCookie = document.cookie.split('; ').find(row => row.startsWith('authorization='));
+
+    if (!authCookie) {
+        // Create modal elements
+        const overlay = document.createElement('div');
+        overlay.className = 'authorization-overlay';
+
+        const modal = document.createElement('div');
+        modal.className = 'authorization-modal';
+        modal.innerHTML = `
+            <h2>Cookie Authorization</h2>
+            <p>Do you allow the website to store session cookies for authorization purposes?</p>
+            <button class="allow">Allow</button>
+            <button class="deny">Deny</button>
+        `;
+
+        document.body.appendChild(overlay);
+        document.body.appendChild(modal);
+
+        // Add event listeners to buttons
+        modal.querySelector('.allow').addEventListener('click', () => {
+            document.cookie = `authorization=allowed; path=/; max-age=${60 * 60 * 24 * 30}`; // Expires in 30 days
+            document.body.removeChild(modal);
+            document.body.removeChild(overlay);
+        });
+
+        modal.querySelector('.deny').addEventListener('click', () => {
+            document.cookie = `authorization=denied; path=/; max-age=${60 * 60 * 24 * 30}`; // Expires in 30 days
+            document.body.removeChild(modal);
+            document.body.removeChild(overlay);
+        });
+    }
+
     const navLinks = document.querySelectorAll('.nav-link');
     const sections = document.querySelectorAll('.page-section');
 
