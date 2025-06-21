@@ -175,6 +175,22 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error contacting backend:', error);
         });
 
+    // Hamburger menu for mobile nav
+    const hamburger = document.querySelector('.hamburger');
+    const navLinksContainer = document.querySelector('.nav-links');
+    if (hamburger && navLinksContainer) {
+        hamburger.style.display = '';
+        hamburger.addEventListener('click', () => {
+            navLinksContainer.classList.toggle('open');
+        });
+        // Close nav on link click (mobile)
+        navLinksContainer.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinksContainer.classList.remove('open');
+            });
+        });
+    }
+
     handleLoginSection();
 });
 
