@@ -202,10 +202,18 @@ html, body {
 }
 
 .dashboard-guild {
-    font-size: 1.1em;
+    font-size: 1.05em;
     color: var(--text-secondary);
+    background-color: rgba(255, 255, 255, 0.05); /* subtle glassy background */
+    border-left: 4px solid var(--accent, #ffc107); /* fallback to amber if --accent is undefined */
+    padding: 1rem 1.2rem;
     margin-bottom: 18px;
+    border-radius: 8px;
+    max-width: 600px;
+    line-height: 1.5;
+    word-wrap: break-word;
 }
+
 
 .dashboard-section-title {
     font-size: 1.3em;
