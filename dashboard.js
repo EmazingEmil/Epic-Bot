@@ -922,7 +922,7 @@ navLinks.forEach(link => {
 
 showSection('overview');
 
-document.getElementById('guild-name').textContent = 'Your Server Name';
+document.getElementById('guild-name').textContent = 'Note: The Dashboard is currently under development. Some features may not be fully functional, and you may encounter bugs or incomplete components.';
 
 if (guildId) {
     showLoadingSpinner();
