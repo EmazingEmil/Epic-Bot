@@ -995,4 +995,18 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(setupDropdownChangeDetection, 1000);
     document.getElementById('apply-changes-cancel').onclick = resetDropdownsToOriginal;
     document.getElementById('apply-changes-apply').onclick = applyDropdownChanges;
+    // Sidebar toggle for dashboard mobile nav
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const dashboardNav = document.querySelector('.dashboard-nav');
+    if (sidebarToggle && dashboardNav) {
+        sidebarToggle.addEventListener('click', () => {
+            dashboardNav.classList.toggle('open');
+        });
+        // Close sidebar on menu link click (mobile)
+        dashboardNav.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                dashboardNav.classList.remove('open');
+            });
+        });
+    }
 });
