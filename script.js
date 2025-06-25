@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.innerHTML = `
             <h2>Cookie Authorization</h2>
             <p>Do you allow the website to store session cookies for authorization purposes?</p>
+            <p style="font-size:0.98rem;margin:0.7rem 0 1.2rem 0;color:#a7a9be;">Want to see what cookies we use and why? <a href="cookie-details.html" target="_blank" style="color:#7f5af0;text-decoration:underline;">View cookie details</a></p>
             <button class="allow">Allow</button>
             <button class="deny">Deny</button>
         `;
